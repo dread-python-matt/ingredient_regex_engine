@@ -30,10 +30,19 @@ jobs:
         run: uv sync --extra dev
 
       - name: Run tests with coverage
-        run: uv run pytest
+        run: >
+          uv run pytest
+          --cov=regex_engine
+          --cov-branch
+          --cov-report=term-missing
+          --cov-report=xml:coverage.xml
 
       - name: Verify coverage report
-        run: test -f coverage.xml && ls -lh coverage.xml
+        run: |
+          pwd
+          ls -la
+          test -f coverage.xml
+          ls -lh coverage.xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
