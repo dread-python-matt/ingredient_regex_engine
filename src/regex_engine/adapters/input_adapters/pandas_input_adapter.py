@@ -30,11 +30,11 @@ class PandasInputAdapter:
         if self._count_column and self._count_column in data.columns:
             return [
                 IngredientRecord(
-                    name=row[self._name_column],
+                    name=str(row[self._name_column]).strip(),
                     count=int(row[self._count_column]),
                 )
                 for _, row in data.iterrows()
-                if row[self._name_column]
+                if pd.notna(row[self._name_column]) and str(row[self._name_column]).strip()
             ]
 
         names = [

@@ -1,13 +1,14 @@
 import logging
-from typing import Iterable
+
 
 from regex_engine.domain.models.resolved_ingredient import ResolvedIngredient
 from regex_engine.adapters.input_adapters.types import EngineInput
 from regex_engine.domain.enums import Category
 from regex_engine.domain.errors import DemoModeError, UnfeasibleStandardisation, AmountExtractionError
 from regex_engine.domain.models.registry_container import RegistryContainerReader
-from regex_engine.ports.filter_engine import IngredientLearningEngine
+
 from regex_engine.ports.input_adapter import InputAdapter
+from regex_engine.ports.learning_engine import IngredientLearningEngine
 from regex_engine.ports.regex_resolver import RegexResolver
 
 logger = logging.getLogger(__name__)

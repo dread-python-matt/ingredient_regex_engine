@@ -50,6 +50,9 @@ class AgentCategorizer:
 
 
     async def categorize(self, ingredient:str) -> Category:
+        if not ingredient or not ingredient.strip():
+            raise ValueError("Ingredient cannot be empty")
+
         logger.info("Categorizing ingredient %s ...", ingredient)
         failures: list[AttemptFailure] = []
 

@@ -87,9 +87,12 @@ class RegexResolverDefault:
         remainders = self._regex_kind_token_regex.sub("", standardized).strip()
         clean = self._trash_regex.sub("", remainders).strip()
 
-        if not clean or is_number(clean):
+        parts = clean.split()
+
+        if not parts:
             return True
-        return False
+
+        return all(is_number(part) for part in parts)
 
 
     def _extract_extra(self, text: str) -> str:
