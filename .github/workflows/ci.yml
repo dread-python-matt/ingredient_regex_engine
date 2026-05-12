@@ -18,3 +18,5 @@ jobs:
 
       - name: Run tests
         run: uv run pytest
+
+      - uses: codecov/codecov-action@v5
