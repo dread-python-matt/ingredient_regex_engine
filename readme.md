@@ -1,5 +1,9 @@
 # Ingredient Regex Engine
 
+![CI](https://github.com/romanroman008/ingredient_regex_engine/actions/workflows/ci.yml/badge.svg)
+
+[![codecov](https://codecov.io/gh/romanroman008/ingredient_regex_engine/graph/badge.svg)](https://codecov.io/gh/romanroman008/ingredient_regex_engine)
+
 An NLP engine uses a hybrid approach (LLM + regex) for extracting and normalizing ingredient data from semi-structured text.
 
 ### 🎯 Objective
