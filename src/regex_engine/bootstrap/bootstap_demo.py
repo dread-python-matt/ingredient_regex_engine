@@ -20,7 +20,7 @@ from regex_engine.adapters.parser.demo_parser import DemoIngredientParser
 from regex_engine.application.dto.agent.parsed_ingredient import ParsedIngredient
 
 from regex_engine.application.use_cases.ingredient_regex_engine_demo import IngredientRegexEngineDemo
-from regex_engine.application.use_cases.input_router import InputRouter
+from regex_engine.adapters.input_adapters.input_router import InputRouter
 from regex_engine.application.use_cases.regex_orchestrator_default import RegexOrchestratorDefault
 from regex_engine.application.use_cases.regex_resolver_default import RegexResolverDefault
 from regex_engine.application.use_cases.regex_service_default import RegexServiceDefault

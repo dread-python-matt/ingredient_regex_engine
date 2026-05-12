@@ -54,7 +54,7 @@ class IngredientRegexEngineDemo:
         return results
 
     async def categorize_registries(self) -> dict[str, Category]:
-        raise DemoModeError("Saving registries is not available in demo mode")
+        raise DemoModeError("Categorizing registries is not available in demo mode")
 
     def save_registries(self) -> None:
         raise DemoModeError("Saving registries is not available in demo mode")

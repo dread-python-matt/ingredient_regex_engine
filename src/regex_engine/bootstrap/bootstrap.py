@@ -31,7 +31,7 @@ from regex_engine.domain.models.regex_registry_default import RegexRegistryDefau
 from regex_engine.ports.categorizer import Categorizer
 from regex_engine.ports.ingredient_parser import IngredientParser
 from regex_engine.ports.ingredient_regex_engine import IngredientRegexEngine
-from regex_engine.application.use_cases.input_router import InputRouter
+from regex_engine.adapters.input_adapters.input_router import InputRouter
 from regex_engine.application.use_cases.regex_orchestrator_default import RegexOrchestratorDefault
 from regex_engine.application.use_cases.regex_resolver_default import RegexResolverDefault
 from regex_engine.application.use_cases.regex_service_default import RegexServiceDefault
