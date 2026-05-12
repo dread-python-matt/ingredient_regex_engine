@@ -5,9 +5,8 @@ import pytest
 
 from regex_engine.application.dto.agent.parsed_ingredient import ParsedIngredient
 from regex_engine.application.use_cases.regex_orchestrator_default import RegexOrchestratorDefault
-from regex_engine.domain.enums import RegexKind, EnsureWordStatus
+from regex_engine.domain.enums import EnsureWordStatus, RegexKind
 from regex_engine.domain.models.orchestrator import EnsureIngredientResult, EnsureWordResult
-
 from regex_engine.ports.regex_service import RegexService
 
 
@@ -26,12 +25,13 @@ def orchestrator(services_by_kind):
     return RegexOrchestratorDefault(services_by_kind)
 
 
-def _build_ensure_word_result(kind:RegexKind,
-                              status:EnsureWordStatus,
-                              stem:str="stem",
-                              word:str="word",
-                              exception:Optional[Exception] = None
-                              ):
+def _build_ensure_word_result(
+    kind: RegexKind,
+    status: EnsureWordStatus,
+    stem: str = "stem",
+    word: str = "word",
+    exception: Optional[Exception] = None,
+):
     return EnsureWordResult(kind, status, stem, word, exception)
 
 
@@ -47,17 +47,25 @@ def _build_ensure_word_result(kind:RegexKind,
                 unit="łyżki",
                 condition="",
                 name="cukru trzcinowego",
-                extra=""
+                extra="",
             ),
             EnsureIngredientResult(
                 failed=False,
                 raw_input="2 czubate łyżki cukru trzcinowego",
-                name=_build_ensure_word_result(RegexKind.INGREDIENT_NAME, EnsureWordStatus.CREATED_NEW),
+                name=_build_ensure_word_result(
+                    RegexKind.INGREDIENT_NAME, EnsureWordStatus.CREATED_NEW
+                ),
                 items={
-                    RegexKind.INGREDIENT_NAME: _build_ensure_word_result(RegexKind.INGREDIENT_NAME, EnsureWordStatus.CREATED_NEW),
-                    RegexKind.UNIT: _build_ensure_word_result(RegexKind.UNIT, EnsureWordStatus.CREATED_NEW),
-                    RegexKind.UNIT_SIZE: _build_ensure_word_result(RegexKind.UNIT_SIZE, EnsureWordStatus.CREATED_NEW),
-                }
+                    RegexKind.INGREDIENT_NAME: _build_ensure_word_result(
+                        RegexKind.INGREDIENT_NAME, EnsureWordStatus.CREATED_NEW
+                    ),
+                    RegexKind.UNIT: _build_ensure_word_result(
+                        RegexKind.UNIT, EnsureWordStatus.CREATED_NEW
+                    ),
+                    RegexKind.UNIT_SIZE: _build_ensure_word_result(
+                        RegexKind.UNIT_SIZE, EnsureWordStatus.CREATED_NEW
+                    ),
+                },
             ),
         ),
         pytest.param(
@@ -68,37 +76,55 @@ def _build_ensure_word_result(kind:RegexKind,
                 unit="łyżki",
                 condition="zmielonego",
                 name="cukru trzcinowego",
-                extra=""
+                extra="",
             ),
             EnsureIngredientResult(
                 failed=False,
                 raw_input="2 czubate łyżki zmielonego cukru trzcinowego",
-                name=_build_ensure_word_result(RegexKind.INGREDIENT_NAME, EnsureWordStatus.CREATED_NEW),
+                name=_build_ensure_word_result(
+                    RegexKind.INGREDIENT_NAME, EnsureWordStatus.CREATED_NEW
+                ),
                 items={
-                    RegexKind.INGREDIENT_NAME: _build_ensure_word_result(RegexKind.INGREDIENT_NAME,
-                                                                         EnsureWordStatus.CREATED_NEW),
-                    RegexKind.INGREDIENT_CONDITION : _build_ensure_word_result(RegexKind.INGREDIENT_CONDITION, EnsureWordStatus.CREATED_NEW),
-                    RegexKind.UNIT: _build_ensure_word_result(RegexKind.UNIT, EnsureWordStatus.CREATED_NEW),
-                    RegexKind.UNIT_SIZE: _build_ensure_word_result(RegexKind.UNIT_SIZE, EnsureWordStatus.CREATED_NEW),
-                }
+                    RegexKind.INGREDIENT_NAME: _build_ensure_word_result(
+                        RegexKind.INGREDIENT_NAME, EnsureWordStatus.CREATED_NEW
+                    ),
+                    RegexKind.INGREDIENT_CONDITION: _build_ensure_word_result(
+                        RegexKind.INGREDIENT_CONDITION, EnsureWordStatus.CREATED_NEW
+                    ),
+                    RegexKind.UNIT: _build_ensure_word_result(
+                        RegexKind.UNIT, EnsureWordStatus.CREATED_NEW
+                    ),
+                    RegexKind.UNIT_SIZE: _build_ensure_word_result(
+                        RegexKind.UNIT_SIZE, EnsureWordStatus.CREATED_NEW
+                    ),
+                },
             ),
         ),
-
-    ]
+    ],
 )
-async def test_ensure_ingredient_included_in_registry__happy_path(orchestrator, services_by_kind, ingredient, expected):
+async def test_ensure_ingredient_included_in_registry__happy_path(
+    orchestrator, services_by_kind, ingredient, expected
+):
     # Arrange
-    services_by_kind[RegexKind.INGREDIENT_NAME].ensure_word_included_in_registry.return_value = (
-        _build_ensure_word_result(RegexKind.INGREDIENT_NAME, EnsureWordStatus.CREATED_NEW)
+    services_by_kind[
+        RegexKind.INGREDIENT_NAME
+    ].ensure_word_included_in_registry.return_value = _build_ensure_word_result(
+        RegexKind.INGREDIENT_NAME, EnsureWordStatus.CREATED_NEW
     )
-    services_by_kind[RegexKind.INGREDIENT_CONDITION].ensure_word_included_in_registry.return_value = (
-        _build_ensure_word_result(RegexKind.INGREDIENT_CONDITION, EnsureWordStatus.CREATED_NEW)
+    services_by_kind[
+        RegexKind.INGREDIENT_CONDITION
+    ].ensure_word_included_in_registry.return_value = _build_ensure_word_result(
+        RegexKind.INGREDIENT_CONDITION, EnsureWordStatus.CREATED_NEW
     )
-    services_by_kind[RegexKind.UNIT].ensure_word_included_in_registry.return_value = (
-        _build_ensure_word_result(RegexKind.UNIT, EnsureWordStatus.CREATED_NEW)
+    services_by_kind[
+        RegexKind.UNIT
+    ].ensure_word_included_in_registry.return_value = _build_ensure_word_result(
+        RegexKind.UNIT, EnsureWordStatus.CREATED_NEW
     )
-    services_by_kind[RegexKind.UNIT_SIZE].ensure_word_included_in_registry.return_value = (
-        _build_ensure_word_result(RegexKind.UNIT_SIZE, EnsureWordStatus.CREATED_NEW)
+    services_by_kind[
+        RegexKind.UNIT_SIZE
+    ].ensure_word_included_in_registry.return_value = _build_ensure_word_result(
+        RegexKind.UNIT_SIZE, EnsureWordStatus.CREATED_NEW
     )
 
     # Act

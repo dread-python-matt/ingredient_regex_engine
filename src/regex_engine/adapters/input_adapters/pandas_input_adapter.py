@@ -45,7 +45,4 @@ class PandasInputAdapter:
 
         counter = Counter(names)
 
-        return [
-            IngredientRecord(name=name, count=count)
-            for name, count in counter.items()
-        ]
+        return [IngredientRecord(name=name, count=count) for name, count in counter.items()]

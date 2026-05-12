@@ -2,8 +2,10 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, call
 
 import pytest
-from regex_engine.application.use_cases.ingredient_regex_engine_demo import IngredientRegexEngineDemo
 
+from regex_engine.application.use_cases.ingredient_regex_engine_demo import (
+    IngredientRegexEngineDemo,
+)
 from regex_engine.domain.errors import (
     AmountExtractionError,
     DemoModeError,

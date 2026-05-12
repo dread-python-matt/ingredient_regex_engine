@@ -12,37 +12,31 @@ def repository(tmp_path):
     return FileCategoryRepository(full_path)
 
 
-
-
 @pytest.mark.parametrize(
     "categorized_ingredients, expected_json",
     [
         pytest.param(
             {
-                "jabłko":Category.FRUITS,
-                "sezam":Category.NUTS_AND_SEEDS,
-                "jajka":Category.EGGS,
-                "maliny":Category.FRUITS,
-                "kakao":Category.NUTS_AND_SEEDS,
+                "jabłko": Category.FRUITS,
+                "sezam": Category.NUTS_AND_SEEDS,
+                "jajka": Category.EGGS,
+                "maliny": Category.FRUITS,
+                "kakao": Category.NUTS_AND_SEEDS,
             },
             {
                 "owoce": ["jabłko", "maliny"],
                 "orzechy i nasiona": ["sezam", "kakao"],
-                "jajka": ["jajka"]
+                "jajka": ["jajka"],
             },
             id="multiple_categories",
         ),
         pytest.param(
             {
-                "jabłko":Category.FRUITS,
-                "sezam":Category.NUTS_AND_SEEDS,
-                "jajka":Category.EGGS,
+                "jabłko": Category.FRUITS,
+                "sezam": Category.NUTS_AND_SEEDS,
+                "jajka": Category.EGGS,
             },
-            {
-                "owoce": ["jabłko"],
-                "orzechy i nasiona": ["sezam"],
-                "jajka": ["jajka"]
-            },
+            {"owoce": ["jabłko"], "orzechy i nasiona": ["sezam"], "jajka": ["jajka"]},
             id="single_categories",
         ),
         pytest.param(
@@ -50,8 +44,7 @@ def repository(tmp_path):
             {},
             id="empty",
         ),
-
-    ]
+    ],
 )
 def test_save__happy_path(repository, categorized_ingredients, expected_json):
     # Act
@@ -64,15 +57,14 @@ def test_save__happy_path(repository, categorized_ingredients, expected_json):
     assert actual == expected_json
 
 
-
 @pytest.mark.parametrize(
     "payload, expected",
     [
         pytest.param(
-              {
+            {
                 "owoce": ["jabłko", "maliny"],
                 "orzechy i nasiona": ["sezam", "kakao"],
-                "jajka": ["jajka"]
+                "jajka": ["jajka"],
             },
             {
                 "jabłko": Category.FRUITS,
@@ -84,11 +76,7 @@ def test_save__happy_path(repository, categorized_ingredients, expected_json):
             id="multiple_categories",
         ),
         pytest.param(
-            {
-                "owoce": ["jabłko"],
-                "orzechy i nasiona": ["sezam"],
-                "jajka": ["jajka"]
-            },
+            {"owoce": ["jabłko"], "orzechy i nasiona": ["sezam"], "jajka": ["jajka"]},
             {
                 "jabłko": Category.FRUITS,
                 "sezam": Category.NUTS_AND_SEEDS,
@@ -96,13 +84,12 @@ def test_save__happy_path(repository, categorized_ingredients, expected_json):
             },
             id="single_categories",
         ),
-pytest.param(
-              {
+        pytest.param(
+            {
                 "owoce": [1, "maliny"],
                 "orzechy i nasiona": ["sezam", "kakao"],
                 "jajka": [],
                 "rośliny strączkowe": ["fasola"],
-
             },
             {
                 "maliny": Category.FRUITS,
@@ -112,14 +99,14 @@ pytest.param(
             },
             id="some_invalid_elements",
         ),
-pytest.param(
-                {
-                    "owoce": ["jabłko", "maliny"],
-                    "orzechy i nasiona": ["sezam", "kakao"],
-                    "jajca": ["jajka"],
-                    "rośliny": ["fasola", "ciecierzyca"],
-                    "zupy/buliony":["zupa pomidorowa"]
-                },
+        pytest.param(
+            {
+                "owoce": ["jabłko", "maliny"],
+                "orzechy i nasiona": ["sezam", "kakao"],
+                "jajca": ["jajka"],
+                "rośliny": ["fasola", "ciecierzyca"],
+                "zupy/buliony": ["zupa pomidorowa"],
+            },
             {
                 "jabłko": Category.FRUITS,
                 "maliny": Category.FRUITS,
@@ -129,7 +116,7 @@ pytest.param(
             },
             id="some_invalid_categories",
         ),
-    ]
+    ],
 )
 def test_load__happy_path(repository, payload, expected):
     # Arrange
@@ -140,5 +127,3 @@ def test_load__happy_path(repository, payload, expected):
 
     # Assert
     assert actual == expected
-
-

@@ -3,13 +3,13 @@ from dataclasses import dataclass, field
 from typing import Iterable
 
 
-def _is_empty(word:str) -> bool:
+def _is_empty(word: str) -> bool:
     if len(word.strip()) == 0:
         return True
     return False
 
 
-def _normalize_stem(stem:str):
+def _normalize_stem(stem: str):
     return "_".join(stem.split())
 
 
@@ -19,7 +19,7 @@ class RegexEntry:
     _pattern: re.Pattern
     _variants: set[str] = field(default_factory=set)
 
-    def __init__(self, stem:str, variants:Iterable[str]):
+    def __init__(self, stem: str, variants: Iterable[str]):
         if _is_empty(stem):
             raise ValueError(f"stem {stem} cannot be empty")
         self._stem = _normalize_stem(stem)
@@ -33,7 +33,6 @@ class RegexEntry:
         )
         alts = "|".join(map(re.escape, variants))
         self._pattern = re.compile(rf"\b(?:{alts})\b", re.IGNORECASE)
-
 
     @property
     def stem(self):
@@ -56,7 +55,6 @@ class RegexEntry:
     def find_spans(self, text: str) -> list[tuple[int, int]]:
         return [(m.start(), m.end()) for m in self._pattern.finditer(text)]
 
-
     def add_variant(self, variant: str) -> None:
         variant = variant.strip()
         if not variant:
@@ -68,7 +66,6 @@ class RegexEntry:
         self._variants.add(variant)
 
         self._compile()
-
 
     def remove_variant(self, variant: str) -> None:
         variant = variant.strip()

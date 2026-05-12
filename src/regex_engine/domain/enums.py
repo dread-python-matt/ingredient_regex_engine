@@ -1,9 +1,11 @@
-from enum import Enum, auto, StrEnum
+from enum import Enum, auto
+
 
 class EnsureIngredientStatus(str, Enum):
     SUCCESS = "success"
     PARTIAL_SUCCESS = "partial_success"
     FAILED = "failed"
+
 
 class EnsureWordStatus(Enum):
     ALREADY_MATCHED = auto()
@@ -11,6 +13,7 @@ class EnsureWordStatus(Enum):
     CREATED_NEW = auto()
     SKIPPED_EMPTY = auto()
     FAILED = auto()
+
 
 class RegexKind(str, Enum):
     UNIT_SIZE = "unit_size"

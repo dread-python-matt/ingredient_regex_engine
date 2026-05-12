@@ -9,9 +9,11 @@ from regex_engine.domain.models.regex_entry import RegexEntry
 from regex_engine.ports.regex_registry import RegexRegistryReader, RegexRegistryWriter
 from regex_engine.ports.token_normalizer import TokenNormalizer
 
+
 @pytest.fixture
 def kind() -> RegexKind:
     return next(iter(RegexKind))
+
 
 @pytest.fixture
 def normalizer() -> TokenNormalizer:

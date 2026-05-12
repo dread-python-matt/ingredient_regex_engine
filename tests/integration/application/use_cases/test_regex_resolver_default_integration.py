@@ -1,13 +1,11 @@
 import pytest
+
 from regex_engine.application.use_cases.amount_extractor_default import AmountExtractorDefault
 from regex_engine.application.use_cases.regex_resolver_default import RegexResolverDefault
-
 from regex_engine.domain.enums import RegexKind
 from regex_engine.domain.errors import UnfeasibleStandardisation
 from regex_engine.domain.models.regex_entry import RegexEntry
 from regex_engine.domain.models.regex_registry_default import RegexRegistryDefault
-
-
 
 
 def make_entry(stem: str, *variants: str) -> RegexEntry:

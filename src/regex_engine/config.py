@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Union
 
-
 PathLike = Union[str, Path]
 
 
@@ -26,10 +25,10 @@ def _resolve_dir(path: PathLike, base_dir: Optional[Path] = None) -> Path:
 
 @dataclass
 class AgentConfig:
-    model:str = "gpt-4o-mini"
-    timeout:int = 20
-    ensemble_size:int = 5
-    max_retries:int = 3
+    model: str = "gpt-4o-mini"
+    timeout: int = 20
+    ensemble_size: int = 5
+    max_retries: int = 3
 
 
 @dataclass(slots=True)
@@ -57,5 +56,3 @@ class EngineConfig:
             parser=parser,
             categorizer=categorizer,
         )
-
-

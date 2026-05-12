@@ -1,14 +1,15 @@
-import pytest
 from unittest.mock import AsyncMock
 
+import pytest
+
+from regex_engine.adapters.parser.agent_ingredient_parser.agent_ingredient_parser import (
+    AgentIngredientParser,
+)
+from regex_engine.application.dto.agent.parsed_ingredient import ParsedIngredient
 from regex_engine.domain.errors import (
     AmbiguousParsingError,
     IngredientParsingError,
     ParsingAttemptFailedError,
-)
-from regex_engine.application.dto.agent.parsed_ingredient import ParsedIngredient
-from regex_engine.adapters.parser.agent_ingredient_parser.agent_ingredient_parser import (
-    AgentIngredientParser,
 )
 
 
@@ -121,7 +122,9 @@ class TestParseOnce:
         assert parser_client.parse.await_count == 3
 
     @pytest.mark.asyncio
-    async def test_should_raise_parsing_attempt_failed_error_when_all_calls_fail(self, parser_client):
+    async def test_should_raise_parsing_attempt_failed_error_when_all_calls_fail(
+        self, parser_client
+    ):
         ingredient = "150 g masła"
         parser = AgentIngredientParser(
             ensemble_size=3,
@@ -204,9 +207,7 @@ class TestParse:
             parser_client=parser_client,
         )
 
-        parse_once_mock = AsyncMock(
-            side_effect=AmbiguousParsingError("Ambiguous parsing result")
-        )
+        parse_once_mock = AsyncMock(side_effect=AmbiguousParsingError("Ambiguous parsing result"))
         monkeypatch.setattr(parser, "_parse_once", parse_once_mock)
 
         with pytest.raises(

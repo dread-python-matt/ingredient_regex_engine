@@ -1,14 +1,14 @@
 import re
 from typing import Any
 
-from regex_engine.domain.models.resolved_ingredient import ResolvedIngredient
 from regex_engine.domain.enums import RegexKind
 from regex_engine.domain.errors import UnfeasibleStandardisation
+from regex_engine.domain.models.resolved_ingredient import ResolvedIngredient
 from regex_engine.ports.amount_extractor import AmountExtractor
 from regex_engine.ports.regex_registry import RegexRegistryReader
 
 
-def is_number(s:str) -> bool:
+def is_number(s: str) -> bool:
     try:
         float(s)
         return True
@@ -18,14 +18,14 @@ def is_number(s:str) -> bool:
 
 class RegexResolverDefault:
     def __init__(
-            self,
-            amount_extractor:AmountExtractor,
-            ingredient_names: RegexRegistryReader,
-            ingredient_conditions: RegexRegistryReader,
-            unit_sizes: RegexRegistryReader,
-            units: RegexRegistryReader,
-            or_conjunctions: RegexRegistryReader,
-            and_conjunctions: RegexRegistryReader
+        self,
+        amount_extractor: AmountExtractor,
+        ingredient_names: RegexRegistryReader,
+        ingredient_conditions: RegexRegistryReader,
+        unit_sizes: RegexRegistryReader,
+        units: RegexRegistryReader,
+        or_conjunctions: RegexRegistryReader,
+        and_conjunctions: RegexRegistryReader,
     ):
         self.pipeline: list[tuple[RegexKind, RegexRegistryReader]] = [
             (RegexKind.INGREDIENT_NAME, ingredient_names),
@@ -43,16 +43,15 @@ class RegexResolverDefault:
                 for k in sorted(RegexKind, key=lambda x: len(x.name), reverse=True)
             )
         )
-        self._trash_regex = re.compile(
-            r"[,\.;:()\[\]{}\"'“”‘’\-–—/\\*+=|~^]"
-        )
+        self._trash_regex = re.compile(r"[,\.;:()\[\]{}\"'“”‘’\-–—/\\*+=|~^]")
 
-
-    def resolve_ingredient(self, ingredient:str) -> ResolvedIngredient:
+    def resolve_ingredient(self, ingredient: str) -> ResolvedIngredient:
         if not self.can_be_standardized(ingredient):
-            raise UnfeasibleStandardisation(f"Ingredient {ingredient} could not be fully standardized")
+            raise UnfeasibleStandardisation(
+                f"Ingredient {ingredient} could not be fully standardized"
+            )
 
-        results:dict[str, Any] = {"raw_input": ingredient}
+        results: dict[str, Any] = {"raw_input": ingredient}
 
         extra = self._extract_extra(ingredient)
 
@@ -74,7 +73,6 @@ class RegexResolverDefault:
                 f"Failed to resolve ingredient: {ingredient!r}"
             ) from exc
 
-
     def standardize(self, ingredient: str) -> str:
         result = ingredient
         for kind, lookup in self.pipeline:
@@ -93,7 +91,6 @@ class RegexResolverDefault:
             return True
 
         return all(is_number(part) for part in parts)
-
 
     def _extract_extra(self, text: str) -> str:
         match = self._extra_regex.search(text)

@@ -1,27 +1,32 @@
 import asyncio
 import logging
 
-from regex_engine.domain.enums import Category
-from regex_engine.adapters.categorizer.categorizing_vote import choose_proper_category
-from regex_engine.domain.errors import CategorizingAttemptFailedError, CategorizingError, \
-    AttemptFailure, AmbiguousCategoryError
-from regex_engine.application.dto.agent.categorized_ingredient import CategorizedIngredient
 from regex_engine.adapters.categorizer.agent_categorizer_client import AgentCategorizerClient
+from regex_engine.adapters.categorizer.categorizing_vote import choose_proper_category
+from regex_engine.application.dto.agent.categorized_ingredient import CategorizedIngredient
+from regex_engine.domain.enums import Category
+from regex_engine.domain.errors import (
+    AmbiguousCategoryError,
+    AttemptFailure,
+    CategorizingAttemptFailedError,
+    CategorizingError,
+)
 
 logger = logging.getLogger("categorizer")
+
 
 class AgentCategorizer:
     def __init__(
         self,
-        categorizer_agent_client:AgentCategorizerClient,
+        categorizer_agent_client: AgentCategorizerClient,
         ensemble_size: int,
         max_retries: int,
     ):
         self.ensemble_size = ensemble_size
         self.max_retries = max_retries
         self.categorizer_client = categorizer_agent_client
-        
-    async def _categorize_once(self, ingredient:str):
+
+    async def _categorize_once(self, ingredient: str):
         results = await asyncio.gather(
             *(
                 self.categorizer_client.categorize(ingredient, instance)
@@ -47,9 +52,7 @@ class AgentCategorizer:
 
         return choose_proper_category(valid_results)
 
-
-
-    async def categorize(self, ingredient:str) -> Category:
+    async def categorize(self, ingredient: str) -> Category:
         if not ingredient or not ingredient.strip():
             raise ValueError("Ingredient cannot be empty")
 
@@ -77,6 +80,3 @@ class AgentCategorizer:
             self.max_retries,
         )
         raise CategorizingError(ingredient, failures)
-
-
-

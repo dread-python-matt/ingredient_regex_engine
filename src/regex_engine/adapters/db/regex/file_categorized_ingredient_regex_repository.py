@@ -1,40 +1,33 @@
 import json
 import logging
+import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Optional, Sequence
-import re
-from regex_engine.domain.enums import RegexKind, Category
+from typing import Sequence
+
+from regex_engine.domain.enums import Category, RegexKind
 from regex_engine.domain.models.regex_entry import RegexEntry
 from regex_engine.domain.models.regex_registry_default import RegexRegistryDefault
-
-from regex_engine.ports.regex_registry import RegexRegistryReader, RegexRegistry
+from regex_engine.ports.regex_registry import RegexRegistry, RegexRegistryReader
 
 logger = logging.getLogger(__name__)
 
 
 def _create_payload(entries: Sequence[RegexEntry]) -> list[dict]:
     return [
-            {
-                "stem": entry.stem,
-                "variants": sorted(entry.variants),
-                "pattern": entry.pattern.pattern
-            }
-            for entry in entries
-        ]
+        {"stem": entry.stem, "variants": sorted(entry.variants), "pattern": entry.pattern.pattern}
+        for entry in entries
+    ]
 
 
-def _load_payload(payload:list[dict]) -> list[RegexEntry]:
+def _load_payload(payload: list[dict]) -> list[RegexEntry]:
     if not isinstance(payload, list):
         raise ValueError("Expected payload to be a list")
 
     entries = []
     for entry in payload:
         try:
-            regex_entry = RegexEntry(
-                stem=entry["stem"],
-                variants=set(entry["variants"])
-            )
+            regex_entry = RegexEntry(stem=entry["stem"], variants=set(entry["variants"]))
             entries.append(regex_entry)
         except (ValueError, TypeError, re.error) as e:
             logger.warning(
@@ -43,14 +36,14 @@ def _load_payload(payload:list[dict]) -> list[RegexEntry]:
                     "stem": entry["stem"],
                     "variants": entry["variants"],
                     "error": str(e),
-                }
+                },
             )
             continue
 
     return entries
 
 
-def _load_categorized_payload(payload:dict[Category, list[dict]]):
+def _load_categorized_payload(payload: dict[Category, list[dict]]):
     if not isinstance(payload, dict):
         raise ValueError("Expected categorized payload to be a dict")
 
@@ -70,7 +63,7 @@ def _load_categorized_payload(payload:dict[Category, list[dict]]):
                         "stem": entry["stem"],
                         "variants": entry["variants"],
                         "error": str(e),
-                    }
+                    },
                 )
                 continue
 
@@ -78,13 +71,15 @@ def _load_categorized_payload(payload:dict[Category, list[dict]]):
 
 
 class FileCategorizedIngredientRegexRepository:
-    def __init__(self, output_dir: Path, categorized_stems:dict[str, Category] = frozenset) -> None:
+    def __init__(
+        self, output_dir: Path, categorized_stems: dict[str, Category] = frozenset
+    ) -> None:
         self._path = output_dir / "regexes"
-        self._categorized_stems:dict[str, Category] = categorized_stems
+        self._categorized_stems: dict[str, Category] = categorized_stems
 
     def save(self, registry: RegexRegistryReader) -> None:
         kind = registry.kind
-        logger.info(f"Saving regexes: %s ...", kind.name)
+        logger.info("Saving regexes: %s ...", kind.name)
         entries = registry.get_all()
 
         if kind == RegexKind.INGREDIENT_NAME:
@@ -103,9 +98,8 @@ class FileCategorizedIngredientRegexRepository:
 
         logger.info("Saved %s regexes to: %s", len(entries), path)
 
-
-    def load(self, kind:RegexKind) -> RegexRegistry:
-        logger.info(f"Loading regexes: %s ...", kind.name)
+    def load(self, kind: RegexKind) -> RegexRegistry:
+        logger.info("Loading regexes: %s ...", kind.name)
         path = self._create_path(kind)
 
         if not path.exists():
@@ -131,14 +125,12 @@ class FileCategorizedIngredientRegexRepository:
             logger.exception("Invalid payload structure in %s: %s", path, e)
             return RegexRegistryDefault(kind, [])
 
-
-        logger.info(f"Loaded %s regexes.", len(entries))
+        logger.info("Loaded %s regexes.", len(entries))
         return RegexRegistryDefault(kind, entries)
 
-
-
-
-    def _create_categorized_payload(self, entries:Sequence[RegexEntry]) -> dict[Category, list[dict]]:
+    def _create_categorized_payload(
+        self, entries: Sequence[RegexEntry]
+    ) -> dict[Category, list[dict]]:
         payload = defaultdict(list)
 
         for entry in entries:
@@ -146,11 +138,13 @@ class FileCategorizedIngredientRegexRepository:
             if not category:
                 category = Category.UNKNOWN
 
-            payload[category.value].append({
-                "stem":entry.stem,
-                "variants": sorted(entry.variants),
-                "pattern": entry.pattern.pattern,
-            })
+            payload[category.value].append(
+                {
+                    "stem": entry.stem,
+                    "variants": sorted(entry.variants),
+                    "pattern": entry.pattern.pattern,
+                }
+            )
 
         return payload
 
@@ -159,7 +153,6 @@ class FileCategorizedIngredientRegexRepository:
         path = (self._path / name).with_suffix(".json")
         path.parent.mkdir(parents=True, exist_ok=True)
         return path
-
 
     def update_categories(self, categorized_stems: dict[str, Category]) -> None:
         for stem, category in categorized_stems.items():

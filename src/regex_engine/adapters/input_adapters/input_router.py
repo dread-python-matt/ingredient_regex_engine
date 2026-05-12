@@ -5,17 +5,16 @@ from regex_engine.ports.input_adapter import InputAdapter
 
 
 class InputRouter:
-    def __init__(self, *adapters:InputAdapter):
+    def __init__(self, *adapters: InputAdapter):
         self._adapters = adapters
 
-    def supports(self, data:Any) -> bool:
+    def supports(self, data: Any) -> bool:
         for adapter in self._adapters:
             if adapter.supports(data):
                 return True
         return False
 
-
-    def to_records(self, data:Any) -> list[IngredientRecord]:
+    def to_records(self, data: Any) -> list[IngredientRecord]:
         for adapter in self._adapters:
             if adapter.supports(data):
                 return adapter.to_records(data)

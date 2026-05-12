@@ -1,18 +1,16 @@
-from dataclasses import field, dataclass
-from typing import Optional, Mapping, Any
-
-from regex_engine.domain.models.orchestrator import EnsureWordResult
+from dataclasses import dataclass
+from typing import Any, Mapping, Optional
 
 
 @dataclass(frozen=True, slots=True)
 class ResolvedIngredient:
-    raw_input:str
-    amount:float = -1
-    unit_size:Optional[str] = None
-    unit:Optional[str]= None
-    condition:Optional[str] = None
-    name:Optional[str] = None
-    extra:str = ""
+    raw_input: str
+    amount: float = -1
+    unit_size: Optional[str] = None
+    unit: Optional[str] = None
+    condition: Optional[str] = None
+    name: Optional[str] = None
+    extra: str = ""
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "ResolvedIngredient":
@@ -44,9 +42,3 @@ class ResolvedIngredient:
             f"Name: {self.name}\n"
             f"{extra if self.extra else ''}\n"
         )
-
-
-
-
-
-

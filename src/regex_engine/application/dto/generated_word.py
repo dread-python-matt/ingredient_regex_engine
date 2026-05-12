@@ -2,25 +2,30 @@ from dataclasses import dataclass
 from typing import Optional
 
 from regex_engine.application.dto.base_word import BaseWord
-from regex_engine.domain.models.grammar import SentencePart, GrammaticalCase, GrammaticalNumber, GrammaticalGender, \
-    GradationDegree
+from regex_engine.domain.models.grammar import (
+    GradationDegree,
+    GrammaticalCase,
+    GrammaticalGender,
+    GrammaticalNumber,
+    SentencePart,
+)
 
 
 @dataclass(slots=True, frozen=True)
 class GeneratedWord(BaseWord):
     @classmethod
     def _build(
-            cls,
-            lemma: str,
-            surface: str,
-            part: SentencePart,
-            is_negation:bool = False,
-            is_pluralia_tantum=False,
-            number: Optional[set[GrammaticalNumber]] = None,
-            case: Optional[set[GrammaticalCase]] = None,
-            gender: Optional[set[GrammaticalGender]] = None,
-            degree: Optional[GradationDegree] = None,
-            annotations: Optional[list[str]] = None,
+        cls,
+        lemma: str,
+        surface: str,
+        part: SentencePart,
+        is_negation: bool = False,
+        is_pluralia_tantum=False,
+        number: Optional[set[GrammaticalNumber]] = None,
+        case: Optional[set[GrammaticalCase]] = None,
+        gender: Optional[set[GrammaticalGender]] = None,
+        degree: Optional[GradationDegree] = None,
+        annotations: Optional[list[str]] = None,
     ) -> "GeneratedWord":
         return cls(
             lemma=lemma,

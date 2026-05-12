@@ -1,16 +1,19 @@
 from typing import Sequence
 
-from regex_engine.adapters.normalizers.morfeusz.morfeusz_utils import is_word_inflectionally_independent
-from regex_engine.adapters.normalizers.morfeusz.inflector.inflection_request import InflectionRequest
+from regex_engine.adapters.normalizers.morfeusz.inflector.inflection_request import (
+    InflectionRequest,
+)
+from regex_engine.adapters.normalizers.morfeusz.morfeusz_utils import (
+    is_word_inflectionally_independent,
+)
 from regex_engine.application.dto.base_word import BaseWord
 from regex_engine.application.dto.generated_word import GeneratedWord
-
-from regex_engine.domain.models.grammar import SentencePart, GrammaticalNumber, GrammaticalCase
+from regex_engine.domain.models.grammar import GrammaticalCase, GrammaticalNumber, SentencePart
 
 
 class InflectionParadigm:
     def __init__(self, word: BaseWord, variations: Sequence[GeneratedWord]) -> None:
-        self.word:BaseWord = word
+        self.word: BaseWord = word
         self.variations = list(variations)
 
     def inflect(self, request: InflectionRequest) -> BaseWord:
@@ -26,12 +29,9 @@ class InflectionParadigm:
             case _:
                 raise NotImplementedError(f"Unsupported part: {self.word.part}")
 
-    def _inflect_abbreviation(self,
-                              number: GrammaticalNumber,
-                                case: GrammaticalCase) -> BaseWord:
+    def _inflect_abbreviation(self, number: GrammaticalNumber, case: GrammaticalCase) -> BaseWord:
         for variation in self.variations:
-            if (case in variation.case and
-                number in variation.number):
+            if case in variation.case and number in variation.number:
                 return variation
         raise ValueError(f"Cannot inflect abbreviation: {self.word}")
 
@@ -44,16 +44,9 @@ class InflectionParadigm:
         if is_word_inflectionally_independent(self.word):
             return self.word
 
-        effective_number = (
-            GrammaticalNumber.PLURAL
-            if self.word.is_pluralia_tantum
-            else number
-        )
+        effective_number = GrammaticalNumber.PLURAL if self.word.is_pluralia_tantum else number
         for variation in self.variations:
-            if (
-                case in variation.case
-                and effective_number in variation.number
-            ):
+            if case in variation.case and effective_number in variation.number:
                 return variation
 
         raise ValueError(f"Cannot inflect noun: {self.word}")

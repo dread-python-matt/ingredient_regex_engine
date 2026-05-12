@@ -1,39 +1,45 @@
 import logging
 
-
 import morfeusz2
 
-from regex_engine.application.use_cases.amount_extractor_default import AmountExtractorDefault
-from regex_engine.application.use_cases.ingredient_learning_engine import IngredientLearningEngineDefault
-from regex_engine.application.use_cases.learning_rules_default import LearningRulesDefaults
-from regex_engine.ports.ingredient_regex_engine import IngredientRegexEngine
 from regex_engine.adapters.db.regex.demo_regex_repository import DemoRegexRepository
+from regex_engine.adapters.input_adapters.input_router import InputRouter
 from regex_engine.adapters.input_adapters.pandas_input_adapter import PandasInputAdapter
 from regex_engine.adapters.input_adapters.string_input_adapter import StringInputAdapter
-from regex_engine.adapters.input_adapters.string_iterable_input_adapter import StringListInputAdapter
-from regex_engine.adapters.normalizers.morfeusz.adjective_normalizer import MorfeuszAdjectiveNormalizer
+from regex_engine.adapters.input_adapters.string_iterable_input_adapter import (
+    StringListInputAdapter,
+)
+from regex_engine.adapters.normalizers.morfeusz.adjective_normalizer import (
+    MorfeuszAdjectiveNormalizer,
+)
 from regex_engine.adapters.normalizers.morfeusz.inflector.inflector import Inflector
-from regex_engine.adapters.normalizers.morfeusz.ingredient_name import MorfeuszIngredientNameNormalizer
+from regex_engine.adapters.normalizers.morfeusz.ingredient_name import (
+    MorfeuszIngredientNameNormalizer,
+)
 from regex_engine.adapters.normalizers.morfeusz.phrase_analyzer import PhraseAnalyser
 from regex_engine.adapters.normalizers.morfeusz.unit_normalizer import MorfeuszUnitNormalizer
 from regex_engine.adapters.parser.demo_parser import DemoIngredientParser
 from regex_engine.application.dto.agent.parsed_ingredient import ParsedIngredient
-
-from regex_engine.application.use_cases.ingredient_regex_engine_demo import IngredientRegexEngineDemo
-from regex_engine.adapters.input_adapters.input_router import InputRouter
+from regex_engine.application.use_cases.amount_extractor_default import AmountExtractorDefault
+from regex_engine.application.use_cases.ingredient_learning_engine import (
+    IngredientLearningEngineDefault,
+)
+from regex_engine.application.use_cases.ingredient_regex_engine_demo import (
+    IngredientRegexEngineDemo,
+)
+from regex_engine.application.use_cases.learning_rules_default import LearningRulesDefaults
 from regex_engine.application.use_cases.regex_orchestrator_default import RegexOrchestratorDefault
 from regex_engine.application.use_cases.regex_resolver_default import RegexResolverDefault
 from regex_engine.application.use_cases.regex_service_default import RegexServiceDefault
 from regex_engine.domain.enums import RegexKind
 from regex_engine.domain.models.registry_container import RegistryContainerReader
-
+from regex_engine.ports.ingredient_regex_engine import IngredientRegexEngine
 
 logger = logging.getLogger(__name__)
 
 
-
 def create_demo_ingredient_regex_engine(
-        mapping:dict[str:ParsedIngredient]
+    mapping: dict[str:ParsedIngredient],
 ) -> IngredientRegexEngine:
     logger.info("Creating ingredient regex engine demo ...")
 
@@ -42,11 +48,12 @@ def create_demo_ingredient_regex_engine(
     inflector = Inflector(morfeusz)
     phrase_analyser = PhraseAnalyser(morfeusz)
 
-    ingredient_normalizer = MorfeuszIngredientNameNormalizer(inflector=inflector, phrase_analyser=phrase_analyser)
+    ingredient_normalizer = MorfeuszIngredientNameNormalizer(
+        inflector=inflector, phrase_analyser=phrase_analyser
+    )
     unit_normalizer = MorfeuszUnitNormalizer(inflector=inflector, morfeusz=morfeusz)
     unit_size_normalizer = MorfeuszAdjectiveNormalizer(inflector=inflector, morfeusz=morfeusz)
     condition_normalizer = MorfeuszAdjectiveNormalizer(inflector=inflector, morfeusz=morfeusz)
-
 
     regex_repository = DemoRegexRepository()
 
@@ -66,22 +73,29 @@ def create_demo_ingredient_regex_engine(
         and_conjunctions_registry=and_conjunctions_registry,
     )
 
+    ingredient_service = RegexServiceDefault(
+        normalizer=ingredient_normalizer,
+        regex_registry_writer=ingredient_registry,
+        regex_registry_reader=ingredient_registry,
+    )
 
-    ingredient_service = RegexServiceDefault(normalizer=ingredient_normalizer,
-                                             regex_registry_writer=ingredient_registry,
-                                             regex_registry_reader=ingredient_registry)
+    unit_service = RegexServiceDefault(
+        normalizer=unit_normalizer,
+        regex_registry_writer=unit_registry,
+        regex_registry_reader=unit_registry,
+    )
 
-    unit_service = RegexServiceDefault(normalizer=unit_normalizer,
-                                            regex_registry_writer=unit_registry,
-                                            regex_registry_reader=unit_registry)
+    unit_size_service = RegexServiceDefault(
+        normalizer=unit_size_normalizer,
+        regex_registry_writer=unit_size_registry,
+        regex_registry_reader=unit_size_registry,
+    )
 
-    unit_size_service = RegexServiceDefault(normalizer=unit_size_normalizer,
-                                            regex_registry_writer=unit_size_registry,
-                                            regex_registry_reader=unit_size_registry)
-
-    condition_service = RegexServiceDefault(normalizer=condition_normalizer,
-                                            regex_registry_writer=condition_registry,
-                                            regex_registry_reader=condition_registry)
+    condition_service = RegexServiceDefault(
+        normalizer=condition_normalizer,
+        regex_registry_writer=condition_registry,
+        regex_registry_reader=condition_registry,
+    )
 
     services_by_kind = {
         RegexKind.INGREDIENT_NAME: ingredient_service,
@@ -122,9 +136,8 @@ def create_demo_ingredient_regex_engine(
         filter_engine=filter_engine,
         input_adapter=input_router_adapter,
         registries=registry_container,
-        resolver=resolver
+        resolver=resolver,
     )
-
 
     logger.info("Successfully created demo IngredientRegexEngine")
     return ingredient_regex_engine

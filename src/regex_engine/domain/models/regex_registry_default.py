@@ -1,4 +1,4 @@
-from typing import Optional, Sequence, Iterable
+from typing import Optional, Sequence
 
 from regex_engine.domain.enums import RegexKind
 from regex_engine.domain.models.regex_entry import RegexEntry
@@ -6,7 +6,7 @@ from regex_engine.ports.regex_registry import RegexRegistry
 
 
 class RegexRegistryDefault(RegexRegistry):
-    def __init__(self, kind:RegexKind, entries:list[RegexEntry]) -> None:
+    def __init__(self, kind: RegexKind, entries: list[RegexEntry]) -> None:
         self._kind = kind
         self._entries: list[RegexEntry] = entries
         self._by_stem: dict[str, RegexEntry] = self._create_by_stem()
@@ -54,7 +54,6 @@ class RegexRegistryDefault(RegexRegistry):
         entry = self._by_stem[stem]
         entry.remove_variant(variant)
 
-
     def match_best(self, text: str) -> Optional[RegexEntry]:
         text = text.strip()
         if not text:
@@ -83,7 +82,7 @@ class RegexRegistryDefault(RegexRegistry):
         best_end = None
 
         for entry in self._entries:
-            span =  entry.find_spans(text)
+            span = entry.find_spans(text)
             if not span:
                 continue
 
@@ -103,11 +102,8 @@ class RegexRegistryDefault(RegexRegistry):
 
         return self.swap_match(swapped, replacement)
 
-
     def get(self, stem: str) -> Optional[RegexEntry]:
         return self._by_stem.get(stem)
 
     def get_all(self) -> Sequence[RegexEntry]:
         return tuple(sorted(self._entries, key=lambda entry: entry.stem))
-
-

@@ -1,12 +1,7 @@
 import logging
 
-
-
-from regex_engine.domain.errors import  IngredientParsingError, EveryRecordIterated
-
+from regex_engine.domain.errors import EveryRecordIterated, IngredientParsingError
 from regex_engine.domain.models.ingredient_record import IngredientRecord
-
-
 from regex_engine.ports.ingredient_parser import IngredientParser
 from regex_engine.ports.learing_rules import LearningRules
 from regex_engine.ports.regex_orchestrator import RegexOrchestrator
@@ -15,44 +10,44 @@ logger = logging.getLogger("regex_engine")
 
 
 class IngredientLearningEngineDefault:
-    def __init__(self,
-                 regex_orchestrator: RegexOrchestrator,
-                 parser: IngredientParser,
-                 learning_rules: LearningRules,
-                 ):
+    def __init__(
+        self,
+        regex_orchestrator: RegexOrchestrator,
+        parser: IngredientParser,
+        learning_rules: LearningRules,
+    ):
         self._regex_orchestrator = regex_orchestrator
         self._parser = parser
         self._learning_rules = learning_rules
 
-    def _filter_records(self, records:list[IngredientRecord]) -> list[IngredientRecord]:
-        logger.info(f"Filtering %s records", len(records))
+    def _filter_records(self, records: list[IngredientRecord]) -> list[IngredientRecord]:
+        logger.info("Filtering %s records", len(records))
         clean = self._learning_rules.filter_records(records)
         records_with_conj = len(records) - len(clean)
         logger.info("Found %s records with conjunction", records_with_conj)
 
         return clean
 
-    def _reduce_records(self, records:list[IngredientRecord]) -> list[IngredientRecord]:
+    def _reduce_records(self, records: list[IngredientRecord]) -> list[IngredientRecord]:
         logger.info("Reducing records ...")
         remaining_records = self._learning_rules.reduce_records(records)
-        logger.info(f"Reduced %s records", len(records) - len(remaining_records))
+        logger.info("Reduced %s records", len(records) - len(remaining_records))
         logger.info(f"Remaining {len(remaining_records)} records")
         return remaining_records
 
-
-    def _select_next_record(self, records:list[IngredientRecord], processed:set[str]) -> IngredientRecord:
-        record = max((
-                r for r in records if r.name not in processed),
-                key=lambda r: r.count,
-                default=None,
+    def _select_next_record(
+        self, records: list[IngredientRecord], processed: set[str]
+    ) -> IngredientRecord:
+        record = max(
+            (r for r in records if r.name not in processed),
+            key=lambda r: r.count,
+            default=None,
         )
         if record is None:
             raise EveryRecordIterated("No non-iterated records available")
 
         processed.add(record.name)
         return record
-
-
 
     async def learn(self, ingredients: list[IngredientRecord], max_rounds: int = 10):
         records_left = self._filter_records(ingredients)
@@ -66,7 +61,7 @@ class IngredientLearningEngineDefault:
 
         for i in range(iterations):
             try:
-                logger.info(f"Iteration %s of %s ...", i + 1, iterations)
+                logger.info("Iteration %s of %s ...", i + 1, iterations)
 
                 records_left = self._reduce_records(records_left)
 
@@ -74,8 +69,11 @@ class IngredientLearningEngineDefault:
 
                 parsed_ingredient = await self._parser.parse(ingredient.name)
 
-                ensure_result = await self._regex_orchestrator.ensure_ingredient_included_in_registry(parsed_ingredient)
-
+                ensure_result = (
+                    await self._regex_orchestrator.ensure_ingredient_included_in_registry(
+                        parsed_ingredient
+                    )
+                )
 
                 if ensure_result.failed:
                     logger.warning("Issues occurred in iteration %s/%s", i + 1, iterations)
@@ -113,14 +111,10 @@ class IngredientLearningEngineDefault:
                 failed += 1
                 continue
 
-        logger.info(f"Finished learning records {iterations}. "
-                    f"Success: {success}, "
-                    f"Failed: {failed}. "
-                    f"Already included: {iterations - (failed + success)}. "
-                    f"Omitted records with conjunction: {conj_records_number}.")
-
-
-
-
-
-
+        logger.info(
+            f"Finished learning records {iterations}. "
+            f"Success: {success}, "
+            f"Failed: {failed}. "
+            f"Already included: {iterations - (failed + success)}. "
+            f"Omitted records with conjunction: {conj_records_number}."
+        )

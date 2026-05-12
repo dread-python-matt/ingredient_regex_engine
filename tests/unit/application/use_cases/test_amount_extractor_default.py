@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import Mock
+
+import pytest
 
 from regex_engine.application.use_cases.amount_extractor_default import AmountExtractorDefault
 from regex_engine.domain.errors import AmountExtractionError

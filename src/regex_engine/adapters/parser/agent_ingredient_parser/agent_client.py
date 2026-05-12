@@ -1,9 +1,7 @@
 import asyncio
 
-
 import openai
 from agents import Agent, Runner, trace
-
 
 from regex_engine.application.dto.agent.parsed_ingredient import ParsedIngredient
 from regex_engine.domain.errors import InvalidModelError
@@ -106,7 +104,7 @@ OUTPUT:
 """
 
 
-def _build_parser_agent(model:str) -> Agent:
+def _build_parser_agent(model: str) -> Agent:
     return Agent(
         name="parser",
         instructions=PARSER_PROMPT,
@@ -116,12 +114,12 @@ def _build_parser_agent(model:str) -> Agent:
 
 
 class AgentParserClient:
-    def __init__(self, model:str, timeout: int = 20):
+    def __init__(self, model: str, timeout: int = 20):
         self._agent = _build_parser_agent(model)
         self._timeout = timeout
 
     @classmethod
-    async def create(cls, model:str, timeout:int) -> "AgentParserClient":
+    async def create(cls, model: str, timeout: int) -> "AgentParserClient":
         self = cls(model, timeout)
         await self._ping(model)
         return self
@@ -134,14 +132,13 @@ class AgentParserClient:
             )
         return result.final_output
 
-    async def _ping(self, model:str):
+    async def _ping(self, model: str):
         try:
             await asyncio.wait_for(
                 Runner.run(self._agent, "ping"),
                 timeout=self._timeout,
-                )
+            )
         except openai.BadRequestError as exc:
             raise InvalidModelError(f"Model `{model}` is invalid or unavailable") from exc
         except openai.AuthenticationError as exc:
-            raise InvalidModelError(f"Invalid api key") from exc
-
+            raise InvalidModelError("Invalid api key") from exc

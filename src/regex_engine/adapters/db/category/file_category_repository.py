@@ -8,10 +8,10 @@ from typing import Iterable
 from regex_engine.domain.enums import Category
 from regex_engine.ports.categories_repository import CategoryRepository
 
-
 logger = logging.getLogger(__name__)
 
 VALID_WORD_RE = re.compile(r"^[\w\sąćęłńóśźżĄĆĘŁŃÓŚŹŻ-]+$")
+
 
 def is_valid_word(value: str) -> bool:
     if not value or not value.strip():
@@ -22,7 +22,8 @@ def is_valid_word(value: str) -> bool:
 
     return bool(VALID_WORD_RE.fullmatch(value))
 
-def _load(payload:dict[str, list]) -> dict[str, Category]:
+
+def _load(payload: dict[str, list]) -> dict[str, Category]:
     if not isinstance(payload, dict):
         raise TypeError("Expected payload to be a dict")
 
@@ -54,8 +55,7 @@ class FileCategoryRepository(CategoryRepository):
     def __init__(self, output_dir: Path):
         self._path = (output_dir / "categorized_ingredients").with_suffix(".json")
 
-
-    def save(self, categorized_ingredients:dict[str, Category]) -> None:
+    def save(self, categorized_ingredients: dict[str, Category]) -> None:
         payload = defaultdict(list)
 
         for ingredient, category in categorized_ingredients.items():
@@ -68,9 +68,9 @@ class FileCategoryRepository(CategoryRepository):
             logger.exception("Failed to save categorized ingredients to: %s", self._path)
             raise
 
-        logger.info("Saved categorized %s ingredients to: %s",
-                    len(categorized_ingredients),
-                    self._path)
+        logger.info(
+            "Saved categorized %s ingredients to: %s", len(categorized_ingredients), self._path
+        )
 
     def load(self) -> dict[str, Category]:
         logger.info("Loading categories ...")
@@ -94,4 +94,3 @@ class FileCategoryRepository(CategoryRepository):
             return {}
 
         return _load(payload)
-

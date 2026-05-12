@@ -1,19 +1,23 @@
 from morfeusz2 import Morfeusz
 
-from regex_engine.adapters.normalizers.morfeusz.morfeusz_utils import tuples_to_word_analysis
+from regex_engine.adapters.normalizers.morfeusz.inflector.inflection_request import (
+    InflectionRequest,
+)
 from regex_engine.adapters.normalizers.morfeusz.inflector.inflector import Inflector
-
-
+from regex_engine.adapters.normalizers.morfeusz.inflector.inflector_paradigm import (
+    InflectionParadigm,
+)
+from regex_engine.adapters.normalizers.morfeusz.morfeusz_utils import tuples_to_word_analysis
 from regex_engine.application.dto.base_word import BaseWord
+from regex_engine.domain.models.grammar import (
+    GrammaticalCase,
+    GrammaticalGender,
+    GrammaticalNumber,
+    SentencePart,
+)
 
-from regex_engine.adapters.normalizers.morfeusz.inflector.inflector_paradigm import InflectionParadigm
 
-from regex_engine.adapters.normalizers.morfeusz.inflector.inflection_request import InflectionRequest
-
-from regex_engine.domain.models.grammar import GrammaticalNumber, GrammaticalCase, GrammaticalGender, SentencePart
-
-
-def _choose_first_adj_or_pap(words:list[BaseWord]) -> BaseWord:
+def _choose_first_adj_or_pap(words: list[BaseWord]) -> BaseWord:
     for word in words:
         part = word.part
         if part == SentencePart.ADJECTIVE or part == SentencePart.PASSIVE_ADJECTIVAL_PARTICIPLE:
@@ -44,38 +48,32 @@ class MorfeuszAdjectiveNormalizer:
             ]
         ]
 
-        self._adjective:BaseWord | None = None
-        self._adjective_inflector:InflectionParadigm | None = None
+        self._adjective: BaseWord | None = None
+        self._adjective_inflector: InflectionParadigm | None = None
 
-
-
-
-
-    async def stem(self, adjective:str) -> str:
+    async def stem(self, adjective: str) -> str:
         self._prepare(adjective)
         return self._adjective_inflector.inflect(
             InflectionRequest(
                 GrammaticalNumber.SINGULAR,
                 GrammaticalCase.NOMINATIVE,
-                GrammaticalGender.MASC_INANIMATE
+                GrammaticalGender.MASC_INANIMATE,
             )
         ).surface
 
-
-    async def inflect(self, stem:str) -> set[str]:
+    async def inflect(self, stem: str) -> set[str]:
         self._prepare(stem)
 
-        return set(self._adjective_inflector.inflect(inflection).surface
-                for inflection in self._inflections)
+        return set(
+            self._adjective_inflector.inflect(inflection).surface
+            for inflection in self._inflections
+        )
 
-
-
-    def _prepare(self, adjective:str) -> None:
+    def _prepare(self, adjective: str) -> None:
         converted = self._convert_to_single_base_word(adjective)
         adjective_word = _choose_first_adj_or_pap(converted)
         self._adjective = adjective_word
         self._adjective_inflector = self._inflector.prepare(adjective_word)
-
 
     def _convert_to_single_base_word(self, adjective: str) -> list[BaseWord]:
         analyses = self._morfeusz.analyse(adjective)
@@ -84,9 +82,3 @@ class MorfeuszAdjectiveNormalizer:
             raise ValueError(f"Multiple words detected {adjective}")
 
         return tuples_to_word_analysis(analyses)
-
-
-
-
-
-

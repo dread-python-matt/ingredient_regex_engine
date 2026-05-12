@@ -38,11 +38,8 @@ class AttemptFailedError(Exception):
         super().__init__(self._build_message())
 
     def _build_message(self) -> str:
-        details = "; ".join(
-            f"{type(error).__name__}: {error}" for error in self.errors
-        )
-        return (f"All attempts to {self.action_verb} '{self.ingredient}' failed. "
-                f"Errors: {details}")
+        details = "; ".join(f"{type(error).__name__}: {error}" for error in self.errors)
+        return f"All attempts to {self.action_verb} '{self.ingredient}' failed. Errors: {details}"
 
 
 class DetailedIngredientError(Exception):
@@ -54,13 +51,10 @@ class DetailedIngredientError(Exception):
         super().__init__(self._build_message())
 
     def _build_message(self) -> str:
-        parts: list[str] = [
-            f"Failed to {self.action_verb} ingredient '{self.ingredient}'"
-        ]
+        parts: list[str] = [f"Failed to {self.action_verb} ingredient '{self.ingredient}'"]
         for failure in self.failures:
             parts.append(
-                f"attempt={failure.attempt} "
-                f"error={type(failure.cause).__name__}: {failure.cause}"
+                f"attempt={failure.attempt} error={type(failure.cause).__name__}: {failure.cause}"
             )
         return " | ".join(parts)
 
@@ -97,12 +91,14 @@ class RecordSelectionError(Exception):
         super().__init__(message)
         self.records_count = records_count
 
+
 class EveryRecordIterated(Exception):
     pass
 
 
 class ConfigurationError(Exception):
     pass
+
 
 class DemoModeError(RuntimeError):
     pass
@@ -111,11 +107,14 @@ class DemoModeError(RuntimeError):
 class UnfeasibleStandardisation(Exception):
     pass
 
+
 class AmountExtractionError(ValueError):
     pass
 
+
 class InvalidModelError(Exception):
     pass
+
 
 class EngineCreationError(Exception):
     pass

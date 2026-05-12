@@ -19,15 +19,8 @@ class StringListInputAdapter:
         if not self.supports(data):
             raise TypeError(f"Unsupported data type: {type(data).__name__}")
 
-        names = [
-            item.strip()
-            for item in data
-            if item.strip()
-        ]
+        names = [item.strip() for item in data if item.strip()]
 
         counter = Counter(names)
 
-        return [
-            IngredientRecord(name=name, count=count)
-            for name, count in counter.items()
-        ]
+        return [IngredientRecord(name=name, count=count) for name, count in counter.items()]

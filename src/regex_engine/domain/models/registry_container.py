@@ -12,6 +12,7 @@ class RegistryContainerReader:
     or_conjunctions_registry: RegexRegistryReader
     and_conjunctions_registry: RegexRegistryReader
 
+
 @dataclass(slots=True)
 class RegistryContainerWriter:
     ingredient_registry: RegexRegistryWriter
@@ -20,6 +21,7 @@ class RegistryContainerWriter:
     condition_registry: RegexRegistryWriter
     or_conjunctions_registry: RegexRegistryWriter
     and_conjunctions_registry: RegexRegistryWriter
+
 
 @dataclass(slots=True)
 class RegistryContainer:

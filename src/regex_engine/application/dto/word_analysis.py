@@ -1,11 +1,14 @@
-from regex_engine.application.dto.base_word import BaseWord
-from regex_engine.domain.models.grammar import GradationDegree, GrammaticalCase
-from regex_engine.domain.models.grammar import SentencePart, GrammaticalNumber, GrammaticalGender
-
-
 from dataclasses import dataclass
 from typing import Optional
 
+from regex_engine.application.dto.base_word import BaseWord
+from regex_engine.domain.models.grammar import (
+    GradationDegree,
+    GrammaticalCase,
+    GrammaticalGender,
+    GrammaticalNumber,
+    SentencePart,
+)
 
 
 @dataclass(slots=True, frozen=True)
@@ -20,7 +23,7 @@ class WordAnalysis(BaseWord):
         surface: str,
         part: SentencePart,
         is_negation: bool = False,
-        is_pluralia_tantum = False,
+        is_pluralia_tantum=False,
         number: Optional[set[GrammaticalNumber]] = None,
         case: Optional[set[GrammaticalCase]] = None,
         gender: Optional[set[GrammaticalGender]] = None,
@@ -40,7 +43,6 @@ class WordAnalysis(BaseWord):
             degree=degree,
             annotations=annotations or tuple(),
         )
-
 
     @classmethod
     def from_tuple(cls, analysis: tuple) -> "WordAnalysis":
@@ -81,4 +83,3 @@ class WordAnalysis(BaseWord):
             base["degree"] = GradationDegree(degree_values[0]) if degree_values else None
 
         return cls._build(**base)
-

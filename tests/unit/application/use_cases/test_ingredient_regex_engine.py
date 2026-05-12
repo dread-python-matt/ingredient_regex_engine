@@ -3,11 +3,9 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, call
 
 import pytest
+
 from regex_engine.application.use_cases.ingredient_regex_engine import IngredientRegexEngineDefault
-
 from regex_engine.domain.errors import AmountExtractionError, UnfeasibleStandardisation
-
-
 
 
 @dataclass(frozen=True)
@@ -264,9 +262,7 @@ async def test_should_categorize_ingredient_registry(
     result = await engine.categorize_registries()
 
     assert result == expected_categories
-    categorizer_service.categorize.assert_awaited_once_with(
-        registries.ingredient_registry
-    )
+    categorizer_service.categorize.assert_awaited_once_with(registries.ingredient_registry)
 
 
 def test_should_save_all_registries(

@@ -1,9 +1,8 @@
-import pytest
 import pandas as pd
+import pytest
+
 from regex_engine.adapters.input_adapters.pandas_input_adapter import PandasInputAdapter
-
 from regex_engine.domain.models.ingredient_record import IngredientRecord
-
 
 
 def records_to_tuples(records: list[IngredientRecord]) -> list[tuple[str, int]]:

@@ -2,8 +2,11 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 
 import pytest
-from regex_engine.application.use_cases.ingredient_learning_engine import IngredientLearningEngineDefault
-from regex_engine.domain.errors import EveryRecordIterated, IngredientParsingError, AttemptFailure
+
+from regex_engine.application.use_cases.ingredient_learning_engine import (
+    IngredientLearningEngineDefault,
+)
+from regex_engine.domain.errors import AttemptFailure, EveryRecordIterated, IngredientParsingError
 
 
 def make_record(name: str, count: int = 1):
@@ -173,8 +176,8 @@ async def test_should_respect_max_rounds(
     learning_rules.reduce_records.side_effect = None
 
     parser.parse.return_value = Mock()
-    regex_orchestrator.ensure_ingredient_included_in_registry.return_value = (
-        make_ensure_result(failed=False)
+    regex_orchestrator.ensure_ingredient_included_in_registry.return_value = make_ensure_result(
+        failed=False
     )
 
     await engine.learn(records, max_rounds=2)
@@ -266,8 +269,8 @@ async def test_should_continue_learning_when_parser_raises_ingredient_parsing_er
         parsing_error,
         parsed_ingredient,
     ]
-    regex_orchestrator.ensure_ingredient_included_in_registry.return_value = (
-        make_ensure_result(failed=False)
+    regex_orchestrator.ensure_ingredient_included_in_registry.return_value = make_ensure_result(
+        failed=False
     )
 
     await engine.learn(records, max_rounds=2)
@@ -373,8 +376,8 @@ async def test_should_process_records_by_descending_count_across_iterations(
     learning_rules.reduce_records.side_effect = None
 
     parser.parse.return_value = Mock()
-    regex_orchestrator.ensure_ingredient_included_in_registry.return_value = (
-        make_ensure_result(failed=False)
+    regex_orchestrator.ensure_ingredient_included_in_registry.return_value = make_ensure_result(
+        failed=False
     )
 
     await engine.learn(records, max_rounds=3)

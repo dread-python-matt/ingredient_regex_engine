@@ -1,17 +1,13 @@
 import json
 
-
 import pytest
 
-
-from regex_engine.adapters.db.regex.file_categorized_ingredient_regex_repository import \
-    FileCategorizedIngredientRegexRepository
+from regex_engine.adapters.db.regex.file_categorized_ingredient_regex_repository import (
+    FileCategorizedIngredientRegexRepository,
+)
 from regex_engine.domain.enums import RegexKind
 from regex_engine.domain.models.regex_entry import RegexEntry
 from regex_engine.domain.models.regex_registry_default import RegexRegistryDefault
-
-
-
 
 
 @pytest.fixture
@@ -20,16 +16,11 @@ def repository(tmp_path):
 
 
 def normalize_json(items):
-    return sorted(
-        (item["stem"], tuple(sorted(item["variants"])))
-        for item in items
-    )
+    return sorted((item["stem"], tuple(sorted(item["variants"]))) for item in items)
+
 
 def normalize_entries(entries):
-    return sorted(
-        (entry.stem, tuple(sorted(entry.variants)))
-        for entry in entries
-    )
+    return sorted((entry.stem, tuple(sorted(entry.variants))) for entry in entries)
 
 
 @pytest.mark.parametrize(
@@ -41,24 +32,17 @@ def normalize_entries(entries):
                 entries=[
                     RegexEntry("gram", ["g", "gram", "gramy"]),
                     RegexEntry("mililitr", ["ml", "mililitr", "mililitrów"]),
-                    RegexEntry("łyżeczka", ["łyżeczka", "łyżeczek", "łyżeczki"])
-                ]
+                    RegexEntry("łyżeczka", ["łyżeczka", "łyżeczek", "łyżeczki"]),
+                ],
             ),
             [
                 {
                     "stem": "gram",
                     "variants": ["g", "gram", "gramy"],
                 },
-                {
-                    "stem":"mililitr",
-                    "variants":["ml", "mililitr", "mililitrów"]
-                },
-                {
-                    "stem":"łyżeczka",
-                    "variants":["łyżeczka", "łyżeczek", "łyżeczki"]
-
-                },
-            ]
+                {"stem": "mililitr", "variants": ["ml", "mililitr", "mililitrów"]},
+                {"stem": "łyżeczka", "variants": ["łyżeczka", "łyżeczek", "łyżeczki"]},
+            ],
         ),
         pytest.param(
             RegexRegistryDefault(
@@ -66,12 +50,12 @@ def normalize_entries(entries):
                 entries=[
                     RegexEntry("i", ["i"]),
                     RegexEntry("oraz", ["oraz"]),
-                ]
+                ],
             ),
             [
                 {"stem": "i", "variants": ["i"]},
                 {"stem": "oraz", "variants": ["oraz"]},
-            ]
+            ],
         ),
         pytest.param(
             RegexRegistryDefault(
@@ -80,13 +64,13 @@ def normalize_entries(entries):
                     RegexEntry("lub", ["lub"]),
                     RegexEntry("albo", ["albo"]),
                     RegexEntry("bądź", ["bądź"]),
-                ]
+                ],
             ),
             [
                 {"stem": "lub", "variants": ["lub"]},
                 {"stem": "albo", "variants": ["albo"]},
                 {"stem": "bądź", "variants": ["bądź"]},
-            ]
+            ],
         ),
         pytest.param(
             RegexRegistryDefault(
@@ -95,13 +79,13 @@ def normalize_entries(entries):
                     RegexEntry("posiekany", ["posiekany", "posiekana", "posiekane"]),
                     RegexEntry("pokrojony", ["pokrojony", "pokrojona", "pokrojone"]),
                     RegexEntry("starty", ["starty", "starta", "starte"]),
-                ]
+                ],
             ),
             [
                 {"stem": "posiekany", "variants": ["posiekany", "posiekana", "posiekane"]},
                 {"stem": "pokrojony", "variants": ["pokrojony", "pokrojona", "pokrojone"]},
                 {"stem": "starty", "variants": ["starty", "starta", "starte"]},
-            ]
+            ],
         ),
         pytest.param(
             RegexRegistryDefault(
@@ -110,16 +94,15 @@ def normalize_entries(entries):
                     RegexEntry("mały", ["mały", "mała", "małe"]),
                     RegexEntry("średni", ["średni", "średnia", "średnie"]),
                     RegexEntry("duży", ["duży", "duża", "duże"]),
-                ]
+                ],
             ),
             [
                 {"stem": "mały", "variants": ["mały", "mała", "małe"]},
                 {"stem": "średni", "variants": ["średni", "średnia", "średnie"]},
                 {"stem": "duży", "variants": ["duży", "duża", "duże"]},
-            ]
-        )
-
-    ]
+            ],
+        ),
+    ],
 )
 def test_save__happy_path(repository, registry, expected):
     # Arrange
@@ -132,7 +115,6 @@ def test_save__happy_path(repository, registry, expected):
     assert normalize_json(actual) == normalize_json(expected)
 
 
-
 @pytest.mark.parametrize(
     "registry, expected",
     [
@@ -143,7 +125,7 @@ def test_save__happy_path(repository, registry, expected):
                     RegexEntry("cukier", ["cukier", "cukru", "cukrem"]),
                     RegexEntry("mleko", ["mleko", "mleka", "mlekiem"]),
                     RegexEntry("masło", ["masło", "masła", "masłem"]),
-                ]
+                ],
             ),
             [
                 {
@@ -158,10 +140,9 @@ def test_save__happy_path(repository, registry, expected):
                     "stem": "masło",
                     "variants": ["masło", "masła", "masłem"],
                 },
-            ]
-
+            ],
         )
-    ]
+    ],
 )
 def test_save_ingredient__happy_path(repository, registry, expected):
     # Act
@@ -172,8 +153,6 @@ def test_save_ingredient__happy_path(repository, registry, expected):
         actual = json.load(file)["nieznane"]
 
     assert normalize_json(actual) == normalize_json(expected)
-
-
 
 
 @pytest.mark.parametrize(
@@ -266,7 +245,6 @@ def test_load__happy_path(repository, kind, payload, expected):
 
     # Assert
     assert normalize_entries(actual._entries) == normalize_entries(expected)
-
 
 
 @pytest.mark.parametrize(
@@ -394,12 +372,3 @@ def test_load_ingredients__happy_path(repository, kind, payload, expected):
 
     assert actual.kind == kind
     assert normalize_entries(actual.get_all()) == normalize_entries(expected)
-
-
-
-
-
-
-
-
-

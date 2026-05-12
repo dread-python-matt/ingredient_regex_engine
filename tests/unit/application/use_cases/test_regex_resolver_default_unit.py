@@ -3,12 +3,14 @@ from dataclasses import dataclass
 from unittest.mock import Mock
 
 import pytest
-from regex_engine import ResolvedIngredient
-from regex_engine.application.use_cases.regex_resolver_default import RegexResolverDefault, is_number
 
+from regex_engine import ResolvedIngredient
+from regex_engine.application.use_cases.regex_resolver_default import (
+    RegexResolverDefault,
+    is_number,
+)
 from regex_engine.domain.enums import RegexKind
 from regex_engine.domain.errors import UnfeasibleStandardisation
-
 
 # ^ dostosuj importy do realnej ścieżki modułu
 

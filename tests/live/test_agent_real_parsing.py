@@ -2,8 +2,9 @@ import asyncio
 
 import pytest
 
-
-from regex_engine.adapters.parser.agent_ingredient_parser.agent_ingredient_parser import AgentIngredientParser
+from regex_engine.adapters.parser.agent_ingredient_parser.agent_ingredient_parser import (
+    AgentIngredientParser,
+)
 from regex_engine.application.dto.agent.parsed_ingredient import ParsedIngredient
 
 
@@ -14,13 +15,13 @@ def parser() -> AgentIngredientParser:
 
 TEST_CASES = [
     ParsedIngredient(
-        raw_input = "skórka starta z 1/2 cytryny (lub z jednej limonki)",
-        amount=1/2,
+        raw_input="skórka starta z 1/2 cytryny (lub z jednej limonki)",
+        amount=1 / 2,
         unit_size="",
         unit="",
         condition="starta",
         name="skórka z cytryny",
-        extra="lub z jednej limonki"
+        extra="lub z jednej limonki",
     ),
     ParsedIngredient(
         raw_input="kawałeczek papryczki chili",
@@ -29,7 +30,7 @@ TEST_CASES = [
         unit="kawałeczek",
         condition="",
         name="papryczki chili",
-        extra=""
+        extra="",
     ),
     ParsedIngredient(
         raw_input="150 ml ciepłej wody",
@@ -38,7 +39,7 @@ TEST_CASES = [
         unit="ml",
         condition="ciepłej",
         name="wody",
-        extra=""
+        extra="",
     ),
     ParsedIngredient(
         raw_input="papryczka chili",
@@ -47,7 +48,7 @@ TEST_CASES = [
         unit="",
         condition="",
         name="papryczka chili",
-        extra=""
+        extra="",
     ),
     ParsedIngredient(
         raw_input="2 łyżki posiekanego szczypiorku",
@@ -56,7 +57,7 @@ TEST_CASES = [
         unit="łyżki",
         condition="posiekanego",
         name="szczypiorku",
-        extra=""
+        extra="",
     ),
     ParsedIngredient(
         raw_input="500 g kiszonej kapusty",
@@ -65,7 +66,7 @@ TEST_CASES = [
         unit="g",
         condition="",
         name="kiszonej kapusty",
-        extra=""
+        extra="",
     ),
     ParsedIngredient(
         raw_input="4 łyżki słodkiego sosu chili",
@@ -74,7 +75,7 @@ TEST_CASES = [
         unit="łyżki",
         condition="",
         name="słodkiego sosu chili",
-        extra=""
+        extra="",
     ),
     ParsedIngredient(
         raw_input="1 łyżeczka suszonego majeranku",
@@ -83,16 +84,16 @@ TEST_CASES = [
         unit="łyżeczka",
         condition="",
         name="suszonego majeranku",
-        extra=""
+        extra="",
     ),
     ParsedIngredient(
         raw_input="1/3 szklanki gorzkiego kakao",
-        amount=1/3,
+        amount=1 / 3,
         unit_size="",
         unit="szklanki",
         condition="",
         name="gorzkiego kakao",
-        extra=""
+        extra="",
     ),
     ParsedIngredient(
         raw_input="5 dużych garści świeżego szpinaku",
@@ -101,9 +102,9 @@ TEST_CASES = [
         unit="garści",
         condition="",
         name="świeżego szpinaku",
-        extra=""
+        extra="",
     ),
-ParsedIngredient(
+    ParsedIngredient(
         raw_input="100 g kaszy gryczanej (1 woreczek)",
         amount=100,
         unit_size="",
@@ -113,6 +114,7 @@ ParsedIngredient(
         extra="1 woreczek",
     ),
 ]
+
 
 @pytest.mark.asyncio
 @pytest.mark.live_ai
@@ -130,6 +132,7 @@ async def test_real_agent_parsing():
     assert result.unit_size == ""
     assert result.condition == ""
 
+
 @pytest.mark.asyncio
 @pytest.mark.live_ai
 async def test_real_agent_parsing_2():
@@ -146,21 +149,6 @@ async def test_real_agent_parsing_2():
     assert result.unit_size == ""
     assert result.condition == ""
 
-@pytest.mark.asyncio
-@pytest.mark.live_ai
-async def test_real_agent_parsing_2():
-    parser = AgentIngredientParser()
-
-    result = await asyncio.wait_for(
-        parser.parse("korzeń imbiru"),
-        timeout=30,
-    )
-
-    assert result.name == "korzeń imbiru"
-    assert result.amount == 1
-    assert result.unit == ""
-    assert result.unit_size == ""
-    assert result.condition == ""
 
 @pytest.mark.asyncio
 @pytest.mark.live_ai

@@ -1,12 +1,12 @@
-import os
-from pathlib import Path
 import logging
 import logging.config
+import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent
-OUTPUT_DIR = BASE_DIR / 'output'
+OUTPUT_DIR = BASE_DIR / "output"
 PROJECT_ROOT = BASE_DIR
 
 load_dotenv(PROJECT_ROOT / ".env")
@@ -24,13 +24,11 @@ LOGGING = {
             "format": "%(asctime)s %(levelname)s [%(name)s:%(lineno)d] %(message)s",
         },
     },
-
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
             "stream": "ext://sys.__stdout__",
-
         },
         "file": {
             "class": "logging.FileHandler",
@@ -50,6 +48,3 @@ def configure_logging() -> None:
     logging.config.dictConfig(LOGGING)
     logging.getLogger("openai").setLevel(logging.INFO)
     logging.getLogger("httpcore").setLevel(logging.INFO)
-
-
-

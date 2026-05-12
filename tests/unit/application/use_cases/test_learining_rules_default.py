@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
+
 from regex_engine.application.use_cases.learning_rules_default import LearningRulesDefaults
 
 
@@ -18,7 +19,9 @@ def regex_resolver():
 def and_conjunctions():
     registry = Mock()
     registry.match_best.return_value = None
-    registry.swap_match.side_effect = lambda text, replacement: text.replace(" i ", f" {replacement} ")
+    registry.swap_match.side_effect = lambda text, replacement: text.replace(
+        " i ", f" {replacement} "
+    )
     return registry
 
 
@@ -78,8 +81,8 @@ def test_should_filter_record_when_and_conjunction_separates_ingredients(
 ):
     record = make_record(ingredient)
     and_conjunctions.match_best.return_value = Mock()
-    and_conjunctions.swap_match.side_effect = (
-        lambda text, replacement: text.replace(" i ", f" {replacement} ")
+    and_conjunctions.swap_match.side_effect = lambda text, replacement: text.replace(
+        " i ", f" {replacement} "
     )
 
     result = learning_rules.filter_records([record])
@@ -107,8 +110,8 @@ def test_should_not_filter_record_when_and_conjunction_is_between_mixed_fraction
 ):
     record = make_record(ingredient)
     and_conjunctions.match_best.return_value = Mock()
-    and_conjunctions.swap_match.side_effect = (
-        lambda text, replacement: text.replace(" i ", f" {replacement} ")
+    and_conjunctions.swap_match.side_effect = lambda text, replacement: text.replace(
+        " i ", f" {replacement} "
     )
 
     result = learning_rules.filter_records([record])
@@ -134,8 +137,8 @@ def test_should_not_filter_record_when_and_conjunction_is_between_mixed_decimal_
 ):
     record = make_record(ingredient)
     and_conjunctions.match_best.return_value = Mock()
-    and_conjunctions.swap_match.side_effect = (
-        lambda text, replacement: text.replace(" i ", f" {replacement} ")
+    and_conjunctions.swap_match.side_effect = lambda text, replacement: text.replace(
+        " i ", f" {replacement} "
     )
 
     result = learning_rules.filter_records([record])
@@ -157,8 +160,8 @@ def test_should_filter_only_records_with_non_numeric_and_conjunction(
         return Mock() if " i " in text else None
 
     and_conjunctions.match_best.side_effect = match_best
-    and_conjunctions.swap_match.side_effect = (
-        lambda text, replacement: text.replace(" i ", f" {replacement} ")
+    and_conjunctions.swap_match.side_effect = lambda text, replacement: text.replace(
+        " i ", f" {replacement} "
     )
 
     result = learning_rules.filter_records(records)

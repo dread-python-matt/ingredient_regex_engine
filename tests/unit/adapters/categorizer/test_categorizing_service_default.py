@@ -1,7 +1,8 @@
 from types import SimpleNamespace
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
+
 from regex_engine.adapters.categorizer.categorizer_service_default import CategorizerServiceDefault
 from regex_engine.domain.enums import Category
 from regex_engine.domain.errors import CategorizingError
@@ -16,10 +17,7 @@ def create_ingredient(stem: str):
 
 def create_registry_mock(*stems: str):
     registry = Mock(spec=RegexRegistryReader)
-    registry.get_all.return_value = [
-        create_ingredient(stem)
-        for stem in stems
-    ]
+    registry.get_all.return_value = [create_ingredient(stem) for stem in stems]
     return registry
 
 
@@ -43,6 +41,7 @@ def create_service(
         categorized_ingredients=categorized_ingredients or {},
         repository=repository or create_repository_mock(),
     )
+
 
 @pytest.mark.asyncio
 async def test_categorize__new_ingredient__adds_category():
@@ -115,7 +114,6 @@ async def test_categorize__categorizer_error__sets_unknown():
     # Assert
     assert result["strwe"] == Category.UNKNOWN
     categorizer.categorize.assert_awaited_once_with("strwe")
-
 
 
 def test_save__saves_categorized_ingredients():

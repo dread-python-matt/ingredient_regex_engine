@@ -1,11 +1,14 @@
 import asyncio
 import logging
 
-from regex_engine.domain.errors import ParsingAttemptFailedError, AttemptFailure, \
-    AmbiguousParsingError, IngredientParsingError
 from regex_engine.adapters.parser.agent_ingredient_parser.agent_client import AgentParserClient
-from regex_engine.application.dto.agent.parsed_ingredient import ParsedIngredient
 from regex_engine.adapters.parser.agent_ingredient_parser.parsing_vote import choose_proper_parsing
+from regex_engine.application.dto.agent.parsed_ingredient import ParsedIngredient
+from regex_engine.domain.errors import (
+    AttemptFailure,
+    IngredientParsingError,
+    ParsingAttemptFailedError,
+)
 
 logger = logging.getLogger("ingredient_parser")
 
@@ -27,7 +30,7 @@ class AgentIngredientParser:
                 self.parser_client.parse(ingredient, instance)
                 for instance in range(self.ensemble_size)
             ),
-            return_exceptions=True
+            return_exceptions=True,
         )
         valid_results: list[ParsedIngredient] = []
         errors: list[Exception] = []
@@ -45,7 +48,6 @@ class AgentIngredientParser:
             raise ParsingAttemptFailedError(ingredient, errors)
 
         return choose_proper_parsing(ingredient, valid_results)
-
 
     async def parse(self, ingredient: str) -> ParsedIngredient:
         logger.info("Parsing ingredient %s ...", ingredient)
@@ -65,7 +67,6 @@ class AgentIngredientParser:
                     attempt,
                     self.max_retries,
                 )
-
 
         logger.error(
             "Could not parse %s. Reached max retries %s. Aborting.",

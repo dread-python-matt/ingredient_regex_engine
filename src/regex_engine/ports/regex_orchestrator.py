@@ -5,4 +5,6 @@ from regex_engine.domain.models.orchestrator import EnsureIngredientResult
 
 
 class RegexOrchestrator(Protocol):
-    async def ensure_ingredient_included_in_registry(self, ingredient: ParsedIngredient) -> EnsureIngredientResult: ...
+    async def ensure_ingredient_included_in_registry(
+        self, ingredient: ParsedIngredient
+    ) -> EnsureIngredientResult: ...

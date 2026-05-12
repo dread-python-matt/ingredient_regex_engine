@@ -11,23 +11,24 @@ logger = logging.getLogger("categorizer_service")
 
 
 class CategorizerServiceDefault(CategorizerService):
-    def __init__(self,
-                 categorizer: Categorizer,
-                 categorized_ingredients:dict[str, Category],
-                 repository:CategoryRepository
-                 ) -> None:
+    def __init__(
+        self,
+        categorizer: Categorizer,
+        categorized_ingredients: dict[str, Category],
+        repository: CategoryRepository,
+    ) -> None:
         self._categorizer = categorizer
         self._categorized_ingredients = categorized_ingredients
         self._repository = repository
 
-    async def categorize(self, ingredient_registry:RegexRegistryReader) -> dict[str, Category]:
+    async def categorize(self, ingredient_registry: RegexRegistryReader) -> dict[str, Category]:
         ingredients = ingredient_registry.get_all()
         total = len(ingredients)
 
-        logger.info(f"Categorizing %s ingredients ...", total)
+        logger.info("Categorizing %s ingredients ...", total)
 
         for i, ingredient in enumerate(ingredients):
-            logger.info(f"Categorizing ingredient %s/%s", i, total)
+            logger.info("Categorizing ingredient %s/%s", i, total)
             existing_category = self._categorized_ingredients.get(ingredient.stem)
             if existing_category and existing_category != Category.UNKNOWN:
                 logger.info("Already categorized. Continuing.")
@@ -39,8 +40,7 @@ class CategorizerServiceDefault(CategorizerService):
 
             except CategorizingError as e:
                 logger.error(
-                    "Ingredient categorizing failed"
-                        "Category set to UNKNOWN",
+                    "Ingredient categorizing failedCategory set to UNKNOWN",
                     extra={
                         "ingredient": e.ingredient,
                         "failures": [
@@ -59,12 +59,9 @@ class CategorizerServiceDefault(CategorizerService):
             finally:
                 self._categorized_ingredients[ingredient.stem] = category
 
-        logger.info(f"Categorizing %s ingredients completed.", total)
+        logger.info("Categorizing %s ingredients completed.", total)
 
         return dict(self._categorized_ingredients)
 
     def save(self) -> None:
         self._repository.save(self._categorized_ingredients)
-
-
-

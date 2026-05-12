@@ -1,7 +1,7 @@
 import asyncio
 
 import openai
-from agents import Agent, trace, Runner
+from agents import Agent, Runner, trace
 
 from regex_engine.application.dto.agent.categorized_ingredient import CategorizedIngredient
 from regex_engine.domain.enums import Category
@@ -105,7 +105,7 @@ def category_enum_to_prompt() -> str:
     return "\n".join(f'- "{c.value}"' for c in Category)
 
 
-def _build_categorizer_agent(model:str) -> Agent:
+def _build_categorizer_agent(model: str) -> Agent:
     return Agent(
         name="categorizer",
         instructions=categorizer_prompt,
@@ -115,7 +115,7 @@ def _build_categorizer_agent(model:str) -> Agent:
 
 
 class AgentCategorizerClient:
-    def __init__(self, model:str, timeout:int):
+    def __init__(self, model: str, timeout: int):
         self._agent = _build_categorizer_agent(model)
         self._timeout = timeout
 
@@ -133,14 +133,13 @@ class AgentCategorizerClient:
             )
         return result.final_output
 
-    async def _ping(self, model:str):
+    async def _ping(self, model: str):
         try:
             await asyncio.wait_for(
                 Runner.run(self._agent, "ping"),
                 timeout=self._timeout,
-                )
+            )
         except openai.BadRequestError as exc:
             raise InvalidModelError(f"Model `{model}` is invalid or unavailable") from exc
         except openai.AuthenticationError as exc:
-            raise InvalidModelError(f"Invalid api key") from exc
-
+            raise InvalidModelError("Invalid api key") from exc

@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
+
 from regex_engine.adapters.input_adapters.input_router import InputRouter
 
 

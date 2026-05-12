@@ -15,7 +15,7 @@ dependencies = [
     "python-dotenv==1.2.2",
     "morfeusz2>=1.99",
     "pandas",
-    "psycopg[binary]"
+    "psycopg[binary]",
 ]
 
 [project.optional-dependencies]
@@ -23,7 +23,8 @@ dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "coverage>=7.0",
-    "pytest-asyncio>=0.24.0"
+    "pytest-asyncio>=0.24.0",
+    "ruff>=0.15.12",
 ]
 
 [tool.setuptools]
@@ -47,3 +48,15 @@ omit = [
     "*/__init__.py",
 ]
 show_missing = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/regex_engine/adapters/categorizer/agent_categorizer_client.py" = ["E501"]
+"src/regex_engine/adapters/parser/agent_ingredient_parser/agent_client.py" = ["E501"]
+"tests/**/*.py" = ["E501"]
