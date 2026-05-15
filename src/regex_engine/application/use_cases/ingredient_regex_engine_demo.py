@@ -1,7 +1,6 @@
 import logging
 
 from regex_engine.adapters.input_adapters.types import EngineInput
-
 from regex_engine.domain.errors import (
     AmountExtractionError,
     DemoModeError,

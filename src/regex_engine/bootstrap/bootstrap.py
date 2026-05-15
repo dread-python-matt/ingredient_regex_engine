@@ -3,9 +3,9 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-
 import morfeusz2
-from sqlalchemy.orm.session import sessionmaker, Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm.session import Session, sessionmaker
 
 from regex_engine.adapters.categorizer.agent_categorizer import AgentCategorizer
 from regex_engine.adapters.categorizer.agent_categorizer_client import AgentCategorizerClient
@@ -45,8 +45,14 @@ from regex_engine.application.use_cases.learning_rules_default import LearningRu
 from regex_engine.application.use_cases.regex_orchestrator_default import RegexOrchestratorDefault
 from regex_engine.application.use_cases.regex_resolver_default import RegexResolverDefault
 from regex_engine.application.use_cases.regex_service_default import RegexServiceDefault
-from regex_engine.config import AgentConfig, EngineConfig, StorageConfig, PathLike, FileStorageConfig, \
-    DatabaseStorageConfig
+from regex_engine.config import (
+    AgentConfig,
+    DatabaseStorageConfig,
+    EngineConfig,
+    FileStorageConfig,
+    PathLike,
+    StorageConfig,
+)
 from regex_engine.domain.enums import RegexKind
 from regex_engine.domain.errors import ConfigurationError, InvalidModelError
 from regex_engine.domain.models.regex_entry import RegexEntry
@@ -62,7 +68,6 @@ from regex_engine.ports.categorizer_service import CategorizerService
 from regex_engine.ports.ingredient_parser import IngredientParser
 from regex_engine.ports.ingredient_regex_engine import IngredientRegexEngine
 from regex_engine.ports.regex_registry import RegexRegistry, RegexRegistryRepository
-from sqlalchemy import create_engine
 
 logger = logging.getLogger("bootstrap")
 
@@ -88,7 +93,9 @@ async def create_ingredient_regex_engine(config: EngineConfig) -> IngredientRege
         repository=repository_bundle.category_repository,
     )
     engine = _build_engine(
-        regex_repository=repository_bundle.regex_repository, categorizer_service=categorizer_service, parser=parser
+        regex_repository=repository_bundle.regex_repository,
+        categorizer_service=categorizer_service,
+        parser=parser
     )
     logger.info("Successfully created IngredientRegexEngine")
 

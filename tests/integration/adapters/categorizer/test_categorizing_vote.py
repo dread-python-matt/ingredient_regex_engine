@@ -1,8 +1,9 @@
 import pytest
 
 from regex_engine.adapters.categorizer.categorizing_vote import choose_proper_category
-from regex_engine.application.dto.agent.categorized_ingredient_agent import CategorizedIngredientAgent
-
+from regex_engine.application.dto.agent.categorized_ingredient_agent import (
+    CategorizedIngredientAgent,
+)
 from regex_engine.domain.enums import Category
 
 
