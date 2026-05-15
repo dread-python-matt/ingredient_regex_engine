@@ -1,0 +1,16 @@
+[
+  {
+    "stem": "i",
+    "variants": [
+      "i"
+    ],
+    "pattern": "\\b(?:i)\\b"
+  },
+  {
+    "stem": "oraz",
+    "variants": [
+      "oraz"
+    ],
+    "pattern": "\\b(?:oraz)\\b"
+  }
+]

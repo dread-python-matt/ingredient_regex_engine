@@ -2,8 +2,8 @@ import logging
 from dataclasses import fields
 
 from regex_engine.adapters.input_adapters.types import EngineInput
-from regex_engine.domain.enums import Category
 from regex_engine.domain.errors import AmountExtractionError, UnfeasibleStandardisation
+from regex_engine.domain.models.categorized_ingredient import CategorizedIngredient
 from regex_engine.domain.models.registry_container import RegistryContainerReader
 from regex_engine.domain.models.resolved_ingredient import ResolvedIngredient
 from regex_engine.ports.categorizer_service import CategorizerService
@@ -58,7 +58,7 @@ class IngredientRegexEngineDefault:
 
         return results
 
-    async def categorize_registries(self) -> dict[str, Category]:
+    async def categorize_registries(self) -> dict[str, CategorizedIngredient]:
         return await self._category_service.categorize(self._registries.ingredient_registry)
 
     def save_registries(self) -> None:
@@ -72,3 +72,7 @@ class IngredientRegexEngineDefault:
 
     def save_categories(self) -> None:
         self._category_service.save()
+
+    def save(self) -> None:
+        self.save_registries()
+        self.save_categories()

@@ -10,11 +10,12 @@ from regex_engine.adapters.db.sqlalchemy.mapping.mappers import (
 from regex_engine.adapters.db.sqlalchemy.models import CategorizedIngredientRecord, RegexEntryRecord
 from regex_engine.domain.enums import RegexKind
 from regex_engine.domain.models.categorized_ingredient import CategorizedIngredient
+from regex_engine.ports.categories_repository import CategoryRepository
 
 logger = logging.getLogger("__name__")
 
 
-class SQLAlchemyCategoryRepository:
+class SQLAlchemyCategoryRepository(CategoryRepository):
     def __init__(self, session_factory:sessionmaker[Session]):
         self._session_factory = session_factory
 

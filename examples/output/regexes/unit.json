@@ -1,0 +1,75 @@
+[
+  {
+    "stem": "gram",
+    "variants": [
+      "g",
+      "gram",
+      "grama",
+      "gramami",
+      "gramem",
+      "gramy"
+    ],
+    "pattern": "\\b(?:gramami|gramem|grama|gramy|gram|g)\\b"
+  },
+  {
+    "stem": "litr",
+    "variants": [
+      "litr",
+      "litra",
+      "litrami",
+      "litrem",
+      "litry",
+      "litrów"
+    ],
+    "pattern": "\\b(?:litrami|litrem|litrów|litra|litry|litr)\\b"
+  },
+  {
+    "stem": "mililitr",
+    "variants": [
+      "mililitr",
+      "mililitra",
+      "mililitrami",
+      "mililitrem",
+      "mililitry",
+      "mililitrów",
+      "ml"
+    ],
+    "pattern": "\\b(?:mililitrami|mililitrem|mililitrów|mililitra|mililitry|mililitr|ml)\\b"
+  },
+  {
+    "stem": "szczypta",
+    "variants": [
+      "szczypt",
+      "szczypta",
+      "szczyptami",
+      "szczypty",
+      "szczyptą",
+      "szczyptę"
+    ],
+    "pattern": "\\b(?:szczyptami|szczypta|szczypty|szczyptą|szczyptę|szczypt)\\b"
+  },
+  {
+    "stem": "szklanka",
+    "variants": [
+      "szklanek",
+      "szklanka",
+      "szklankami",
+      "szklanki",
+      "szklanką",
+      "szklankę"
+    ],
+    "pattern": "\\b(?:szklankami|szklanek|szklanka|szklanki|szklanką|szklankę)\\b"
+  },
+  {
+    "stem": "łyżka",
+    "variants": [
+      "łyżek",
+      "łyżka",
+      "łyżkami",
+      "łyżki",
+      "łyżką",
+      "łyżkę"
+    ],
+    "pattern": "\\b(?:łyżkami|łyżek|łyżka|łyżki|łyżką|łyżkę)\\b"
+  }
+]

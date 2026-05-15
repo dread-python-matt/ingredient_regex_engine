@@ -15,11 +15,10 @@ class CategorizerServiceDefault(CategorizerService):
     def __init__(
         self,
         categorizer: Categorizer,
-        categorized_ingredients: dict[str,CategorizedIngredient],
         repository: CategoryRepository,
     ) -> None:
         self._categorizer = categorizer
-        self._categorized_ingredients:dict[str, CategorizedIngredient] = categorized_ingredients
+        self._categorized_ingredients:dict[str, CategorizedIngredient] = repository.load()
         self._repository = repository
 
 

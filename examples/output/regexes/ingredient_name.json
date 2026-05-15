@@ -1,0 +1,103 @@
+{
+  "nieznane": [
+    {
+      "stem": "jajko_kurka_zielononóżki",
+      "variants": [
+        "jajek kurek zielononóżki",
+        "jajka kurek zielononóżki",
+        "jajka kurki zielononóżki",
+        "jajkami kurek zielononóżki",
+        "jajkami kurkami zielononóżki",
+        "jajkiem kurki zielononóżki",
+        "jajkiem kurką zielononóżki",
+        "jajko kurka zielononóżki",
+        "jajko kurki zielononóżki",
+        "jajko kurkę zielononóżki"
+      ],
+      "pattern": "\\b(?:jajkami\\ kurkami\\ zielononóżki|jajkami\\ kurek\\ zielononóżki|jajkiem\\ kurki\\ zielononóżki|jajkiem\\ kurką\\ zielononóżki|jajek\\ kurek\\ zielononóżki|jajka\\ kurek\\ zielononóżki|jajka\\ kurki\\ zielononóżki|jajko\\ kurka\\ zielononóżki|jajko\\ kurki\\ zielononóżki|jajko\\ kurkę\\ zielononóżki)\\b"
+    },
+    {
+      "stem": "kurkuma",
+      "variants": [
+        "kurkum",
+        "kurkuma",
+        "kurkumami",
+        "kurkumy",
+        "kurkumą",
+        "kurkumę"
+      ],
+      "pattern": "\\b(?:kurkumami|kurkuma|kurkumy|kurkumą|kurkumę|kurkum)\\b"
+    },
+    {
+      "stem": "makaron_pełnoziarnisty",
+      "variants": [
+        "makaron pełnoziarnisty",
+        "makaronami pełnoziarnistymi",
+        "makaronem pełnoziarnistym",
+        "makaronu pełnoziarnistego",
+        "makarony pełnoziarniste",
+        "makaronów pełnoziarnistych"
+      ],
+      "pattern": "\\b(?:makaronami\\ pełnoziarnistymi|makaronów\\ pełnoziarnistych|makaronem\\ pełnoziarnistym|makaronu\\ pełnoziarnistego|makarony\\ pełnoziarniste|makaron\\ pełnoziarnisty)\\b"
+    },
+    {
+      "stem": "mleko",
+      "variants": [
+        "mlek",
+        "mleka",
+        "mlekami",
+        "mlekiem",
+        "mleko"
+      ],
+      "pattern": "\\b(?:mlekami|mlekiem|mleka|mleko|mlek)\\b"
+    },
+    {
+      "stem": "sos_rybny",
+      "variants": [
+        "sos rybny",
+        "sosami rybnymi",
+        "sosem rybnym",
+        "sosu rybnego",
+        "sosy rybne",
+        "sosów rybnych"
+      ],
+      "pattern": "\\b(?:sosami\\ rybnymi|sosów\\ rybnych|sosem\\ rybnym|sosu\\ rybnego|sosy\\ rybne|sos\\ rybny)\\b"
+    },
+    {
+      "stem": "twaróg_wiejski",
+      "variants": [
+        "twarogami wiejskimi",
+        "twarogi wiejskie",
+        "twarogiem wiejskim",
+        "twarogu wiejskiego",
+        "twarogów wiejskich",
+        "twaróg wiejski"
+      ],
+      "pattern": "\\b(?:twarogami\\ wiejskimi|twarogiem\\ wiejskim|twarogu\\ wiejskiego|twarogów\\ wiejskich|twarogi\\ wiejskie|twaróg\\ wiejski)\\b"
+    },
+    {
+      "stem": "woda",
+      "variants": [
+        "woda",
+        "wodami",
+        "wody",
+        "wodą",
+        "wodę",
+        "wód"
+      ],
+      "pattern": "\\b(?:wodami|woda|wody|wodą|wodę|wód)\\b"
+    },
+    {
+      "stem": "śmietana",
+      "variants": [
+        "śmietan",
+        "śmietana",
+        "śmietanami",
+        "śmietany",
+        "śmietaną",
+        "śmietanę"
+      ],
+      "pattern": "\\b(?:śmietanami|śmietana|śmietany|śmietaną|śmietanę|śmietan)\\b"
+    }
+  ]
+}

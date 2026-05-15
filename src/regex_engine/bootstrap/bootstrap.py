@@ -1,7 +1,11 @@
 import logging
 import os
+from dataclasses import dataclass
+from pathlib import Path
+
 
 import morfeusz2
+from sqlalchemy.orm.session import sessionmaker, Session
 
 from regex_engine.adapters.categorizer.agent_categorizer import AgentCategorizer
 from regex_engine.adapters.categorizer.agent_categorizer_client import AgentCategorizerClient
@@ -10,6 +14,9 @@ from regex_engine.adapters.db.file.category.file_category_repository import File
 from regex_engine.adapters.db.file.regex.file_categorized_ingredient_regex_repository import (
     FileCategorizedIngredientRegexRepository,
 )
+from regex_engine.adapters.db.sqlalchemy.models import Base
+from regex_engine.adapters.db.sqlalchemy.sql_category_repository import SQLAlchemyCategoryRepository
+from regex_engine.adapters.db.sqlalchemy.sql_regex_repository import SQLAlchemyRegexRepository
 from regex_engine.adapters.input_adapters.input_router import InputRouter
 from regex_engine.adapters.input_adapters.pandas_input_adapter import PandasInputAdapter
 from regex_engine.adapters.input_adapters.string_input_adapter import StringInputAdapter
@@ -38,7 +45,8 @@ from regex_engine.application.use_cases.learning_rules_default import LearningRu
 from regex_engine.application.use_cases.regex_orchestrator_default import RegexOrchestratorDefault
 from regex_engine.application.use_cases.regex_resolver_default import RegexResolverDefault
 from regex_engine.application.use_cases.regex_service_default import RegexServiceDefault
-from regex_engine.config import AgentConfig, EngineConfig
+from regex_engine.config import AgentConfig, EngineConfig, StorageConfig, PathLike, FileStorageConfig, \
+    DatabaseStorageConfig
 from regex_engine.domain.enums import RegexKind
 from regex_engine.domain.errors import ConfigurationError, InvalidModelError
 from regex_engine.domain.models.regex_entry import RegexEntry
@@ -48,24 +56,28 @@ from regex_engine.domain.models.registry_container import (
     RegistryContainerReader,
     RegistryContainerWriter,
 )
+from regex_engine.ports.categories_repository import CategoryRepository
 from regex_engine.ports.categorizer import Categorizer
 from regex_engine.ports.categorizer_service import CategorizerService
 from regex_engine.ports.ingredient_parser import IngredientParser
 from regex_engine.ports.ingredient_regex_engine import IngredientRegexEngine
 from regex_engine.ports.regex_registry import RegexRegistry, RegexRegistryRepository
+from sqlalchemy import create_engine
 
 logger = logging.getLogger("bootstrap")
+
+
+@dataclass(frozen=True, slots=True)
+class RepositoryBundle:
+    regex_repository: RegexRegistryRepository
+    category_repository: CategoryRepository
 
 
 async def create_ingredient_regex_engine(config: EngineConfig) -> IngredientRegexEngine:
     logger.info("Creating IngredientRegexEngine ...")
     validate_environment()
-    _validate_path(config)
-    category_repository = FileCategoryRepository(config.output_dir)
-    categorized_ingredients = category_repository.load()
-    regex_repository = FileCategorizedIngredientRegexRepository(
-        config.output_dir, categorized_ingredients
-    )
+
+    repository_bundle = _build_repository(config.storage)
 
     categorizer = await create_categorizer(config.categorizer)
 
@@ -73,23 +85,73 @@ async def create_ingredient_regex_engine(config: EngineConfig) -> IngredientRege
 
     categorizer_service = CategorizerServiceDefault(
         categorizer=categorizer,
-        categorized_ingredients=categorized_ingredients,
-        repository=category_repository,
+        repository=repository_bundle.category_repository,
     )
     engine = _build_engine(
-        regex_repository=regex_repository, categorizer_service=categorizer_service, parser=parser
+        regex_repository=repository_bundle.regex_repository, categorizer_service=categorizer_service, parser=parser
     )
     logger.info("Successfully created IngredientRegexEngine")
+
     return engine
 
 
-def _validate_path(config: EngineConfig):
-    if not config.output_dir.exists():
-        logger.error("Output directory does not exist")
-        raise ConfigurationError("Invalid output directory")
-    if not config.output_dir.is_dir():
-        logger.error("Output is not a directory")
-        raise ConfigurationError("Invalid output directory")
+def _build_repository(config:StorageConfig):
+    match config:
+        case FileStorageConfig(output_dir=output_dir):
+            output_path = _resolve_output_dir(output_dir)
+
+            category_repository = FileCategoryRepository(output_path)
+            categorized_ingredients = category_repository.load()
+
+            regex_repository = FileCategorizedIngredientRegexRepository(
+                output_path,
+                categorized_ingredients,
+            )
+
+            return RepositoryBundle(
+                regex_repository=regex_repository,
+                category_repository=category_repository,
+            )
+
+        case DatabaseStorageConfig() as db_config:
+            engine = create_engine(
+                db_config.database_url,
+                echo=db_config.echo,
+                pool_pre_ping=db_config.pool_pre_ping,
+                **db_config.engine_options,
+            )
+            if config.create_schema:
+                Base.metadata.create_all(engine)
+
+            session_factory = sessionmaker(
+                bind=engine,
+                class_=Session,
+                expire_on_commit=False,
+            )
+
+            return RepositoryBundle(
+                regex_repository=SQLAlchemyRegexRepository(session_factory),
+                category_repository=SQLAlchemyCategoryRepository(session_factory),
+            )
+
+        case _:
+            raise ConfigurationError(f"Unsupported storage config: {config!r}")
+
+
+def _resolve_output_dir(path: PathLike) -> Path:
+    output_dir = Path(path).expanduser().resolve()
+
+    if output_dir.exists() and not output_dir.is_dir():
+        raise ConfigurationError(f"Expected directory, got file: {output_dir}")
+
+    try:
+        output_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        raise ConfigurationError(
+            f"Could not create output directory: {output_dir}"
+        ) from exc
+
+    return output_dir
 
 
 def validate_environment() -> None:

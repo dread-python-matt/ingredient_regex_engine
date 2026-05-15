@@ -1,0 +1,37 @@
+[
+  {
+    "stem": "albo",
+    "variants": [
+      "albo"
+    ],
+    "pattern": "\\b(?:albo)\\b"
+  },
+  {
+    "stem": "bądź",
+    "variants": [
+      "bądź"
+    ],
+    "pattern": "\\b(?:bądź)\\b"
+  },
+  {
+    "stem": "ewentualnie",
+    "variants": [
+      "ewentualnie"
+    ],
+    "pattern": "\\b(?:ewentualnie)\\b"
+  },
+  {
+    "stem": "lub",
+    "variants": [
+      "lub"
+    ],
+    "pattern": "\\b(?:lub)\\b"
+  },
+  {
+    "stem": "lub_też",
+    "variants": [
+      "lub też"
+    ],
+    "pattern": "\\b(?:lub\\ też)\\b"
+  }
+]

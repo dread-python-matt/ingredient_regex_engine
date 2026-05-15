@@ -1,0 +1,32 @@
+[
+  {
+    "stem": "czubaty",
+    "variants": [
+      "czubata",
+      "czubate",
+      "czubatego",
+      "czubatej",
+      "czubaty",
+      "czubatych",
+      "czubatym",
+      "czubatymi",
+      "czubatą"
+    ],
+    "pattern": "\\b(?:czubatego|czubatych|czubatymi|czubatej|czubatym|czubata|czubate|czubaty|czubatą)\\b"
+  },
+  {
+    "stem": "duży",
+    "variants": [
+      "duża",
+      "duże",
+      "dużego",
+      "dużej",
+      "duży",
+      "dużych",
+      "dużym",
+      "dużymi",
+      "dużą"
+    ],
+    "pattern": "\\b(?:dużego|dużych|dużymi|dużej|dużym|duża|duże|duży|dużą)\\b"
+  }
+]

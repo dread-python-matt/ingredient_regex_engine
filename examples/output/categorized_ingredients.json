@@ -1,0 +1,46 @@
+{
+  "jajka": [
+    {
+      "id": "b71010f2-66bd-4367-a7d1-8efb130335a1",
+      "stem": "jajko_kurka_zielononóżki"
+    }
+  ],
+  "przyprawy i zioła": [
+    {
+      "id": "6a516471-b477-455a-a429-f6675e0636cb",
+      "stem": "kurkuma"
+    }
+  ],
+  "produkty zbożowe": [
+    {
+      "id": "76153a4d-1009-4f60-8b0a-eb7bdb62669b",
+      "stem": "makaron_pełnoziarnisty"
+    }
+  ],
+  "nabiał": [
+    {
+      "id": "b366d9fc-7bb7-43fb-bb05-84be1daf51f6",
+      "stem": "mleko"
+    },
+    {
+      "id": "21346dc3-657f-4bd9-a5c3-52fcc23f98ce",
+      "stem": "twaróg_wiejski"
+    },
+    {
+      "id": "b036f6dc-b8dc-4b1b-aa11-797c9ee9a2ec",
+      "stem": "śmietana"
+    }
+  ],
+  "sosy i dressingi": [
+    {
+      "id": "189314c3-9c3e-49d5-a8ac-a6afa5abae1b",
+      "stem": "sos_rybny"
+    }
+  ],
+  "niejadalne": [
+    {
+      "id": "32f1149b-df4b-40ed-8e8d-c69a3f2114a2",
+      "stem": "woda"
+    }
+  ]
+}

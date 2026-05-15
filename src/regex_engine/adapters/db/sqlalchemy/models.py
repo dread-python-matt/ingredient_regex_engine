@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from typing import Iterable
 from uuid import UUID
 
-from sqlalchemy import String
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm.mapper import validates
 from sqlalchemy.sql.schema import ForeignKey
+from sqlalchemy.sql.sqltypes import JSON
 
 
 class Base(DeclarativeBase):
@@ -18,10 +20,26 @@ class RegexEntryRecord(Base):
     regex_kind: Mapped[str] = mapped_column(primary_key=True)
     stem: Mapped[str] = mapped_column(unique=True,  nullable=False)
     variants: Mapped[list[str]] = mapped_column(
-        ARRAY(String),
+        MutableList.as_mutable(JSON),
+        default=list,
         nullable=False,
     )
     pattern:Mapped[str]
+
+    @validates("variants")
+    def validate_variants(self, key: str, value: Iterable[str] | None) -> list[str]:
+        if value is None:
+            return []
+
+        if isinstance(value, str):
+            raise TypeError("variants must be an iterable of strings, not str")
+
+        normalized = sorted(value)
+
+        if not all(isinstance(item, str) for item in normalized):
+            raise TypeError("variants must contain only strings")
+
+        return normalized
 
     categorized_ingredient_id: Mapped[UUID] = mapped_column(
         ForeignKey("categorized_ingredients.id"),
