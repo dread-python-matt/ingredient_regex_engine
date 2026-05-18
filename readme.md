@@ -68,7 +68,7 @@ cd ingredient_regex_engine
 python -m pip install .
 ```
 
-For editable local development, including test and lint dependencies:
+For editable local development, including test dependencies:
 
 ```bash
 python -m pip install -e ".[dev]"
