@@ -30,6 +30,9 @@ dev = [
     "ruff>=0.15.12",
     "testcontainers[postgres]==4.14.2"
 ]
+api = [
+    "fastapi>=0.115",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}

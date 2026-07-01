@@ -57,13 +57,13 @@ Clear separation between domain logic, parsing, and persistence layers.
 ## Install from GitHub
 
 ```bash
-python -m pip install git+https://github.com/romanroman008/ingredient_regex_engine.git
+python -m pip install git+https://github.com/dread-python-matt/ingredient_regex_engine.git
 ```
 
 ### Or clone and install locally
 
 ```bash
-git clone https://github.com/romanroman008/ingredient_regex_engine.git
+git clone https://github.com/dread-python-matt/ingredient_regex_engine.git
 cd ingredient_regex_engine
 python -m pip install .
 ```
@@ -80,13 +80,13 @@ Install the package directly from GitHub:
 
 ```bash
 pip install uv
-uv pip install git+https://github.com/romanroman008/ingredient_regex_engine.git
+uv pip install git+https://github.com/dread-python-matt/ingredient_regex_engine.git
 ```
 
 For local development with uv:
 
 ```bash
-git clone https://github.com/romanroman008/ingredient_regex_engine.git
+git clone https://github.com/dread-python-matt/ingredient_regex_engine.git
 cd ingredient_regex_engine
 uv sync --extra dev
 ```
@@ -118,7 +118,7 @@ uv run pytest
 
 #  🛠️ Tech Stack
 
-- Python 3.11+
+- Python 3.10+
 - Pydantic v2 (data validation)
 - OpenAI Agents SDK (LLM / agent pipeline)
 - Morfeusz2 (Polish morphological analysis)
@@ -203,25 +203,58 @@ Two demonstration notebooks are available in the `examples` directory:
 
 
 ```python
-from regex_engine import EngineConfig, AgentConfig, create_engine
+import asyncio
+
 from dotenv import load_dotenv
+from regex_engine import AgentConfig, EngineConfig, FileStorageConfig, create_engine
 
 load_dotenv()
 
 default_config = AgentConfig(
-  model="gpt-4o-mini",
-  timeout=20,
-  ensemble_size=5,
-  max_retries=3,
+    model="gpt-4o-mini",
+    timeout=20,
+    ensemble_size=5,
+    max_retries=3,
 )
 
-config = EngineConfig.create(output_dir="path/to/output/directory",
-                             parser=AgentConfig(),
-                             categorizer=AgentConfig()
-                             )
+config = EngineConfig(
+    storage=FileStorageConfig(output_dir="output"),
+    parser=default_config,
+    categorizer=default_config,
+)
 
-engine = await create_engine(config)
+
+async def main():
+    engine = await create_engine(config)
+
+    # 1) learn ingredients (uses the LLM once)
+    await engine.learn(
+        """
+        2 duże łyżki ciepłego mleka
+        1 szklanka wody
+        3 jajka
+        """,
+        max_iterations=100,
+    )
+
+    # 2) (optional) assign food categories to what was learned (uses the LLM)
+    await engine.categorize_registries()
+
+    # 3) recognize new inputs — pure regex, no LLM
+    for resolved in engine.recognize_ingredients(["szklanka mleka", "3 jajka"]):
+        print(resolved)
+
+    # 4) persist registries + categories to ./output
+    engine.save()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
+
+> The script above is the whole flow in one file. The sections below explain each of those
+> calls (`learn`, `recognize_ingredients`, `categorize_registries`, `save`) in detail — they
+> all run **inside `main()`**.
 
 - If `and_conjunctions` and `or_conjunctions` are unavailable in the input data or are empty,
   they are initialized automatically during engine bootstrap.
@@ -229,7 +262,7 @@ engine = await create_engine(config)
 
 ```python
 
-await engine.learn([
+await engine.learn(
     """
     2 duże łyżki ciepłego mleka
     1 szklanka wody
@@ -237,7 +270,7 @@ await engine.learn([
     5 czubatych łyżek śmietany
     1 i 1/3 słoika dżemu
     """,
-    max_iterations=100
+    max_iterations=100,
 )
 ```
 ### 📦 `RegexRegistry`
