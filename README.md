@@ -1,820 +1,372 @@
-# Ingredient Regex Engine
+# 🧬 Ingredient Regex Engine — Hybrid LLM + Regex NLP
 
-![CI](https://github.com/romanroman008/ingredient_regex_engine/actions/workflows/ci.yml/badge.svg)
+> A hybrid **LLM + regex** NLP engine that extracts and normalizes structured ingredient data from
+> semi-structured Polish recipe text, then compiles reusable regex registries so that runtime
+> recognition needs **no language model at all**.
 
-[![codecov](https://codecov.io/gh/romanroman008/ingredient_regex_engine/graph/badge.svg)](https://codecov.io/gh/romanroman008/ingredient_regex_engine)
-
-An NLP engine uses a hybrid approach (LLM + regex) for extracting and normalizing ingredient data from semi-structured text.
-
-### 🎯 Objective
-
-Transforms ingredient lists into a consistent data representation by:
-- parsing ingredients using an LLM,
-- performing inflectional normalization for the Polish language,
-- building and utilizing regex registries.
-
-This enables fast and deterministic processing without relying on language models at runtime.
-
-### 🚀 Core Assumptions
-
-- ingredient name extraction  
-- quantity and unit identification  
-- inflectional normalization of the Polish language  
-
-### 🧩 Use Cases
-
-- shopping list processing  
-- food label analysis  
-- dietary and meal planning systems  
-- e-commerce (product data standardization)  
+<p>
+  <img alt="CI" src="https://github.com/romanroman008/ingredient_regex_engine/actions/workflows/ci.yml/badge.svg">
+  <a href="https://codecov.io/gh/romanroman008/ingredient_regex_engine"><img alt="codecov" src="https://codecov.io/gh/romanroman008/ingredient_regex_engine/graph/badge.svg"></a>
+  <img alt="Language" src="https://img.shields.io/badge/Python-3.10%2B-3776AB">
+  <img alt="Pydantic" src="https://img.shields.io/badge/Pydantic-v2-E92063">
+  <img alt="LLM" src="https://img.shields.io/badge/LLM-OpenAI%20Agents%20SDK-412991">
+  <img alt="NLP" src="https://img.shields.io/badge/NLP-Morfeusz2-1F8AC0">
+  <img alt="Persistence" src="https://img.shields.io/badge/persistence-SQLAlchemy%20%2F%20PostgreSQL-D71F00">
+  <img alt="Architecture" src="https://img.shields.io/badge/architecture-Hexagonal-8A2BE2">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-green">
+</p>
 
 ---
 
-# ⭐ Key Features
+## 📑 Table of Contents
 
-### ⚡ LLM → Regex Compilation
-Transforms LLM-parsed ingredients into reusable regex patterns for deterministic processing.
-
-### 🧠 Inflection-Aware Parsing (Polish NLP)
-Handles complex morphological variations using Morfeusz-based normalization and variant generation.
-
-### 🚀 Zero LLM Cost at Runtime
-After training, ingredient recognition runs without any LLM calls.
-
-### 🧩 Fine-Grained Ingredient Decomposition
-Extracts structured fields: amount, unit, unit size, condition, name, and extra context.
-
-### 🔁 Self-Improving Regex Registry
-Continuously expands pattern coverage by learning new variants from input data.
-
-### 🏗️ Modular Architecture (Ports & Adapters)
-Clear separation between domain logic, parsing, and persistence layers.
+1. [Purpose](#-purpose)
+2. [Feature Overview](#-feature-overview)
+3. [Tech Stack](#-tech-stack)
+4. [Architecture](#-architecture)
+5. [Workflow](#-workflow)
+6. [Quickstart](#-quickstart)
+7. [Cost Profile](#-cost-profile)
+8. [Public API Surface](#-public-api-surface)
+9. [Credits & License](#-credits--license)
 
 ---
 
-# 🚀 Quickstart
+## 🎯 Purpose
 
-## Install from GitHub
-
-```bash
-python -m pip install git+https://github.com/dread-python-matt/ingredient_regex_engine.git
-```
-
-### Or clone and install locally
-
-```bash
-git clone https://github.com/dread-python-matt/ingredient_regex_engine.git
-cd ingredient_regex_engine
-python -m pip install .
-```
-
-For editable local development, including test dependencies:
-
-```bash
-python -m pip install -e ".[dev]"
-```
-
-### Install with uv
-
-Install the package directly from GitHub:
-
-```bash
-pip install uv
-uv pip install git+https://github.com/dread-python-matt/ingredient_regex_engine.git
-```
-
-For local development with uv:
-
-```bash
-git clone https://github.com/dread-python-matt/ingredient_regex_engine.git
-cd ingredient_regex_engine
-uv sync --extra dev
-```
-
-## 🧪Tests
-
-Install development dependencies first:
-
-```bash
-python -m pip install -e ".[dev]"
-```
-
-Run tests:
-
-```bash
-pytest
-```
-
-The default pytest configuration already runs coverage reporting.
-
-With uv:
-
-```bash
-uv run pytest
-```
-
----
-
-
-#  🛠️ Tech Stack
-
-- Python 3.10+
-- Pydantic v2 (data validation)
-- OpenAI Agents SDK (LLM / agent pipeline)
-- Morfeusz2 (Polish morphological analysis)
-- SQLAlchemy
-
----
-
-# ⚙️ Overview
-
-The engine operates in multiple modes.
-
-### 🧠 Learning Mode
-
-The engine accepts a list of ingredients and, using an agent, decomposes each ingredient into components:
-
-- Product name  
-- Unit (handful, milliliter, etc.)  
-- Unit size (large, small, etc.)  
-- Product state (ingredient condition independent of the manufacturer: chopped, cooked, etc.)  
-
-Each component is used to construct a regex pattern that enables data extraction without relying on an LLM and regardless of word inflection.
-
-### ⚡ Structuring Mode
-
-Using the generated regex database, the engine structures data into a `ResolvedIngredient` object
+Recipe and food data is written by humans in free text: `"3 duże garści świeżego szpinaku
+(lub rukoli)"`. Downstream systems (shopping lists, diet planners, e-commerce catalogs) need clean
+structured records:
 
 ```json
 {
-  "raw_input": "3 duże garści świeżego szpianku (lub rukoli)",
+  "raw_input": "3 duże garści świeżego szpinaku (lub rukoli)",
   "amount": 3.0,
-  "unit_size": "duże",
-  "unit": "garści",
-  "condition": "świeżego",
-  "name": "szpianku",
+  "unit_size": "duży",
+  "unit": "garść",
+  "condition": "świeży",
+  "name": "szpinak",
   "extra": "lub rukoli"
 }
 ```
 
-### 🏷️ Categorization Mode
+Doing this naïvely with an LLM for every request is slow, non-deterministic, and costs money per
+call. This project's thesis is a **two-phase design**:
 
-The engine assigns ingredient names from its internal database to appropriate food categories.
+1. **Learning phase (LLM, one-time / offline)** — an LLM ensemble parses each *distinct* ingredient
+   into fields, then Polish morphological analysis (Morfeusz2) expands each field into all its
+   inflected forms and compiles them into a regex.
+2. **Runtime phase (pure regex, zero LLM cost)** — new inputs are matched against the accumulated
+   regex registries deterministically and instantly.
 
-### 💾 Persistence Mode
-
-Stores regex registries and categories in a database.  
-In the current implementation, the repository is file-based due to the requirement for final human validation of both category assignments and regex parsing.
-
-### 💰 Learning Phase Cost
-
-Example (100 ingredients):
-
-- model: gpt-4o-mini
-- ensemble_size: 5
-- retries: 3
-- total cost: $0.09
-
-Cost scales linearly with input size
-> Note: Ingredient categorization uses the same LLM-based mechanism
-> so its cost profile is comparable to the learning phase.
+The genuinely hard part — and the project's real intellectual weight — is **handling Polish
+inflection**: nouns and adjectives change form across 7 grammatical cases × 2 numbers × 3 genders,
+plus phenomena like *pluralia tantum* and multi-noun compounds (`żółtko jajka`, `śmietanka
+kremówka`). The engine reconstructs the base lemma and generates the full paradigm so a single stem
+matches every surface form.
 
 ---
 
-# 👉 📌 Examples
+## ✨ Feature Overview
 
-## 🏗️ Engine Initialization
-### 🔐 Environment Requirements
+| Feature | Description |
+|---|---|
+| **LLM → Regex compilation** | Turns LLM-parsed ingredients into reusable, deterministic regex patterns. |
+| **Inflection-aware normalization** | Morfeusz2-based lemma recovery + paradigm generation for Polish nouns, adjectives, and units. |
+| **Zero LLM cost at runtime** | After learning, `recognize_ingredients()` is pure regex — no API calls. |
+| **Fine-grained decomposition** | Extracts `amount`, `unit`, `unit_size`, `condition`, `name`, `extra`. |
+| **Self-expanding registries** | New variants are merged into existing `RegexEntry` stems; coverage grows with input. |
+| **Ensemble LLM parsing** | Runs N parallel LLM calls and majority-votes the result, with retry-on-failure. |
+| **Two storage backends** | File (JSON) repository and SQLAlchemy/PostgreSQL repository, selected by config. |
+| **Amount arithmetic** | Understands fractions and `4 i 1/2` (number + conjunction + number → 4.5). |
+| **Categorization** | LLM assigns ingredient stems to 22 food categories (`Category` enum). |
+| **Demo mode** | `create_demo()` runs the full pipeline with hand-annotated parses — no API key. |
 
-For proper program execution, setting an API key is required.
+---
 
-Create a `.env` file in the project directory:
+## 🧰 Tech Stack
+
+**Language / runtime**
+- Python **3.10+** (`pyproject.toml` declares `>=3.10`)
+
+**Core libraries**
+- **Pydantic v2** (`2.12.2`) — typed DTOs / LLM structured output
+- **openai-agents** (`>=0.2.0`) — Agents SDK for the parsing & categorization pipeline
+- **Morfeusz2** (`>=1.99`) — Polish morphological analyzer/generator (the NLP core)
+- **SQLAlchemy 2.0** + **Alembic** + **psycopg[binary]** — Postgres persistence & migrations
+- **pandas** — DataFrame input adapter
+- **python-dotenv** — `.env` / API-key loading
+
+**Tooling / quality**
+- **pytest**, **pytest-asyncio**, **pytest-cov**, **coverage** (branch coverage on)
+- **testcontainers[postgres]** — real Postgres in integration tests
+- **ruff** — lint + import sorting (`E`, `F`, `I`)
+- **uv** — dependency resolution / lockfile (`uv.lock`)
+- **GitHub Actions** CI + **Codecov** coverage reporting
+
+---
+
+## 🏛 Architecture
+
+The codebase is a textbook **Ports & Adapters (Hexagonal) / Clean Architecture** layout.
+Dependencies point inward: adapters depend on ports, ports and use-cases depend on the domain; the
+domain depends on nothing.
+
+```mermaid
+flowchart TB
+    API["api.py — create_engine() / create_demo()"]
+    subgraph APP["application (use-cases)"]
+        UC["Engine · LearningEngine · Resolver · Orchestrator · Services"]
+    end
+    subgraph DOMAIN["domain (pure core — no framework imports)"]
+        MODELS["models: RegexEntry · RegexRegistry · ResolvedIngredient · grammar"]
+        PORTS["ports (typing.Protocol): IngredientParser ·<br/>RegexRegistry · TokenNormalizer · …"]
+    end
+    subgraph ADAPTERS["adapters (concrete implementations)"]
+        PARSE["parser — LLM ensemble (openai-agents)"]
+        CAT["categorizer — LLM + majority voting"]
+        MORF["normalizers/morfeusz — phrase analysis, inflector"]
+        IN["input_adapters — str / list[str] / pandas router"]
+        DB["db — file (JSON) + SQLAlchemy repositories"]
+    end
+    BOOT["bootstrap — composition root (DI)"]
+
+    API --> APP
+    APP --> MODELS
+    APP -->|"depends on ports"| PORTS
+    ADAPTERS -. implements .-> PORTS
+    BOOT --> APP
+    BOOT --> ADAPTERS
+```
+
+Source layout:
+
+```
+src/regex_engine/
+├── api.py                  # public entrypoints: create_engine(), create_demo()
+├── config.py               # frozen dataclass configs (Engine/Agent/Storage)
+├── domain/                 # pure business core — no framework imports
+│   ├── enums.py            #   RegexKind, Category, status enums
+│   ├── errors.py           #   rich exception taxonomy
+│   └── models/             #   RegexEntry, RegexRegistry, ResolvedIngredient, grammar…
+├── ports/                  # Protocol interfaces (structural typing) — the "ports"
+│   ├── ingredient_parser.py, regex_registry.py, token_normalizer.py, …
+├── application/            # use-cases orchestrating the domain
+│   ├── use_cases/          #   engine, learning engine, resolver, orchestrator, services
+│   └── dto/                #   agent + Morfeusz data-transfer objects
+├── adapters/               # concrete implementations of the ports
+│   ├── parser/             #   LLM ensemble parser (openai-agents)
+│   ├── categorizer/        #   LLM categorizer + voting
+│   ├── normalizers/morfeusz/  # phrase analysis, inflector, adjective/unit/name normalizers
+│   ├── input_adapters/     #   str / list[str] / pandas → IngredientRecord (router)
+│   └── db/                 #   file (JSON) + sqlalchemy repositories + manual mappers
+└── bootstrap/              # composition root: wires everything via DI
+    ├── bootstrap.py        #   production wiring (storage switch, Morfeusz, agents)
+    └── bootstap_demo.py    #   demo wiring (no LLM)
+```
+
+### Notable design decisions
+
+- **Protocol-based ports.** Interfaces are `typing.Protocol` classes (structural typing), so adapters
+  need not inherit from them — clean, Pythonic dependency inversion.
+- **Reader/Writer segregation.** Each registry is exposed through separate `RegexRegistryReader` /
+  `RegexRegistryWriter` views (a lightweight CQRS split), so recognition code can't accidentally
+  mutate registries.
+- **Composition root.** `bootstrap.py` is the single place objects are constructed and wired; the rest
+  of the code receives dependencies via constructors. No global singletons.
+- **Storage strategy via `match`.** `_build_repository()` pattern-matches on a `FileStorageConfig |
+  DatabaseStorageConfig` union to pick the backend.
+- **Domain/persistence isolation.** SQLAlchemy `RegexEntryRecord`/`CategorizedIngredientRecord` are
+  separate from domain `RegexEntry`; explicit mappers translate between them.
+
+---
+
+## 🔄 Workflow
+
+The two-phase thesis at a glance:
+
+```mermaid
+flowchart LR
+    subgraph LEARN["Learning phase — LLM, offline / one-time"]
+        L1["ingredient text"] --> L2["LLM ensemble parse → fields"]
+        L2 --> L3["Morfeusz: lemma + full paradigm"]
+        L3 --> L4["compile RegexEntry into registries"]
+    end
+    subgraph RUN["Runtime phase — pure regex, $0 LLM"]
+        R1["new input"] --> R2["match against registries"]
+        R2 --> R3["ResolvedIngredient"]
+    end
+    LEARN -. accumulated registries .-> RUN
+```
+
+### 1. Learning — `await engine.learn(data, max_iterations=100)`
+
+1. **Input adaptation.** `InputRouter` dispatches `str` / `list[str]` / `pandas` input to the right
+   adapter, producing `IngredientRecord`s (with occurrence `count`).
+2. **Filtering.** `LearningRules.filter_records` drops records containing conjunctions — *except* when
+   the conjunction sits between numbers (`4 i 1/2`) or inside parentheses.
+3. **Iterative loop** (`IngredientLearningEngineDefault.learn`):
+   - `reduce_records` removes anything already recognizable by current regexes.
+   - The **highest-frequency** unprocessed record is selected (maximize coverage per LLM call).
+   - The ingredient is parsed by the **LLM ensemble** (`AgentIngredientParser`): N parallel calls →
+     majority vote (`choose_proper_parsing`) → retry up to `max_retries`.
+   - `RegexOrchestrator` routes each parsed field to its `RegexService`, which **normalizes**
+     (Morfeusz), **generates the inflection paradigm**, and either creates a new `RegexEntry` or merges
+     variants into an existing stem.
+4. Errors are counted and logged per iteration; the loop is resilient to individual failures.
+
+### 2. Normalization & inflection (the NLP core)
+
+- **`PhraseAnalyser`** decomposes a noun phrase into head noun, dependent noun, and related
+  adjectives, resolving grammatical ambiguity by intersecting case/gender/number bitsets between
+  candidate nouns and their adjectives.
+- **Normalizers** reduce each field to a canonical lemma: names → nominative singular (both nouns for
+  compounds), adjectives (`unit_size`, `condition`) → nominative singular masculine, units → nominative
+  singular.
+- **`Inflector`** uses `morfeusz.generate()` to expand the lemma into its paradigm; invariant words
+  (e.g. `mango`) are detected and left untouched.
+- **`RegexEntry`** compiles the variant set into `\b(?:v1|v2|…)\b` (longest-first, case-insensitive)
+  and recompiles when variants are added.
+
+### 3. Recognition — `engine.recognize_ingredients(data)` *(no LLM)*
+
+1. Extract parenthetical `extra`; extract `amount` (`AmountExtractor` — handles digits, fractions, and
+   `number + and-conjunction + number` summation).
+2. Run each field registry over the cleaned string via a **resolver pipeline**, consuming matched spans
+   as it goes, and build a `ResolvedIngredient`.
+3. Inputs that can't be fully standardized raise `UnfeasibleStandardisation` and are skipped (logged),
+   so a bad row never crashes a batch.
+
+### 4. Categorization & persistence
+
+- `await engine.categorize_registries()` — LLM ensemble assigns each stem to a `Category`.
+- `engine.save_registries()` / `save_categories()` / `save()` — persist to the configured backend. The
+  file backend groups regexes by category and is intended for **human validation** before promotion.
+
+---
+
+## 🚀 Quickstart
+
+> ⚠️ **API note:** the public API is `EngineConfig(storage=…)`. The verified usage below reflects the
+> actual code in `config.py` / `bootstrap.py`.
+
+### Install
+
+```bash
+git clone https://github.com/romanroman008/ingredient_regex_engine.git
+cd ingredient_regex_engine
+python -m pip install -e ".[dev]"     # or: uv sync --extra dev
+```
+
+### Configure credentials
 
 ```env
+# .env
 OPENAI_API_KEY=your_api_key_here
 ```
 
-
-Two demonstration notebooks are available in the `examples` directory:
-
-- `quickstart.ipynb` – requires an API key  
-- `quickstart_demo.ipynb` – no LLM: manual ingredient annotation, no categorization or persistence  
-
-
+### Run (file storage backend)
 
 ```python
 import asyncio
-
 from dotenv import load_dotenv
-from regex_engine import AgentConfig, EngineConfig, FileStorageConfig, create_engine
+from regex_engine import EngineConfig, AgentConfig, FileStorageConfig, create_engine
 
 load_dotenv()
 
-default_config = AgentConfig(
-    model="gpt-4o-mini",
-    timeout=20,
-    ensemble_size=5,
-    max_retries=3,
-)
-
-config = EngineConfig(
-    storage=FileStorageConfig(output_dir="output"),
-    parser=default_config,
-    categorizer=default_config,
-)
-
-
 async def main():
+    config = EngineConfig(
+        storage=FileStorageConfig(output_dir="./output"),
+        parser=AgentConfig(model="gpt-4o-mini", ensemble_size=5, max_retries=3, timeout=20),
+        categorizer=AgentConfig(model="gpt-4o-mini"),
+    )
     engine = await create_engine(config)
 
-    # 1) learn ingredients (uses the LLM once)
     await engine.learn(
         """
         2 duże łyżki ciepłego mleka
         1 szklanka wody
         3 jajka
+        5 czubatych łyżek śmietany
         """,
         max_iterations=100,
     )
 
-    # 2) (optional) assign food categories to what was learned (uses the LLM)
-    await engine.categorize_registries()
+    results = engine.recognize_ingredients(["szklankę ciepłego mleka", "2 jajka"])
+    for r in results:
+        print(r)
 
-    # 3) recognize new inputs — pure regex, no LLM
-    for resolved in engine.recognize_ingredients(["szklanka mleka", "3 jajka"]):
-        print(resolved)
-
-    # 4) persist registries + categories to ./output
     engine.save()
 
-
-if __name__ == "__main__":
-    asyncio.run(main())
+asyncio.run(main())
 ```
 
-> The script above is the whole flow in one file. The sections below explain each of those
-> calls (`learn`, `recognize_ingredients`, `categorize_registries`, `save`) in detail — they
-> all run **inside `main()`**.
-
-- If `and_conjunctions` and `or_conjunctions` are unavailable in the input data or are empty,
-  they are initialized automatically during engine bootstrap.
-## 🧠 Learning: `learn`
+### Postgres backend
 
 ```python
+from regex_engine import EngineConfig, DatabaseStorageConfig, create_engine
 
-await engine.learn(
-    """
-    2 duże łyżki ciepłego mleka
-    1 szklanka wody
-    3 jajka
-    5 czubatych łyżek śmietany
-    1 i 1/3 słoika dżemu
-    """,
-    max_iterations=100,
+config = EngineConfig(
+    storage=DatabaseStorageConfig(
+        database_url="postgresql+psycopg://user:pass@localhost:5432/regex_engine",
+        create_schema=True,
+    ),
 )
 ```
-### 📦 `RegexRegistry`
 
-#### 🧾 ingredient_name_registry
+### Demo (no API key)
 
-```json
-[
-    {
-      "stem": "dżem",
-      "variants": ["dżem", "dżemami", "dżemem", "dżemu", "dżemy", "dżemów"],
-      "pattern": "\\b(?:dżemami|dżemem|dżemów|dżemu|dżemy|dżem)\\b"
-    },
-    {
-      "stem": "jajko",
-      "variants": ["jajek", "jajka", "jajkami", "jajkiem", "jajko"],
-      "pattern": "\\b(?:jajkami|jajkiem|jajek|jajka|jajko)\\b"
-    },
-    {
-      "stem": "mleko",
-      "variants": ["mlek", "mleka", "mlekami", "mlekiem", "mleko"],
-      "pattern": "\\b(?:mlekami|mlekiem|mleka|mleko|mlek)\\b"
-    },
-    {
-      "stem": "woda",
-      "variants": ["woda", "wodami", "wody", "wodą", "wodę", "wód"],
-      "pattern": "\\b(?:wodami|woda|wody|wodą|wodę|wód)\\b"
-    },
-    {
-      "stem": "śmietana",
-      "variants": ["śmietan", "śmietana", "śmietanami", "śmietany", "śmietaną", "śmietanę"],
-      "pattern": "\\b(?:śmietanami|śmietana|śmietany|śmietaną|śmietanę|śmietan)\\b"
-    }
-  ]
-```
-
----
-
-#### 📏 unit_registry
-
-```json
-[
-  {
-    "stem": "szklanka",
-    "variants": ["szklanek", "szklanka", "szklankami", "szklanki", "szklanką", "szklankę"],
-    "pattern": "\\b(?:szklankami|szklanek|szklanka|szklanki|szklanką|szklankę)\\b"
-  },
-  {
-    "stem": "słoik",
-    "variants": ["słoik", "słoika", "słoikami", "słoiki", "słoikiem", "słoików"],
-    "pattern": "\\b(?:słoikami|słoikiem|słoików|słoika|słoiki|słoik)\\b"
-  },
-  {
-    "stem": "łyżka",
-    "variants": ["łyżek", "łyżka", "łyżkami", "łyżki", "łyżką", "łyżkę"],
-    "pattern": "\\b(?:łyżkami|łyżek|łyżka|łyżki|łyżką|łyżkę)\\b"
-  }
-]
-```
-
----
-
-#### 🏷️ unit_size_registry
-
-```json
-[
-  {
-    "stem": "czubaty",
-    "variants": ["czubata", "czubate", "czubatego", "czubatej", "czubaty", "czubatych", "czubatym", "czubatymi", "czubatą"],
-    "pattern": "\\b(?:czubatego|czubatych|czubatymi|czubatej|czubatym|czubata|czubate|czubaty|czubatą)\\b"
-  },
-  {
-    "stem": "duży",
-    "variants": ["duża", "duże", "dużego", "dużej", "duży", "dużych", "dużym", "dużymi", "dużą"],
-    "pattern": "\\b(?:dużego|dużych|dużymi|dużej|dużym|duża|duże|duży|dużą)\\b"
-  }
-]
-```
-
----
-
-#### 🌡️ ingredient_condition_registry
-
-```json
-[
-  {
-    "stem": "ciepły",
-    "variants": ["ciepła", "ciepłe", "ciepłego", "ciepłej", "ciepły", "ciepłych", "ciepłym", "ciepłymi", "ciepłą"],
-    "pattern": "\\b(?:ciepłego|ciepłych|ciepłymi|ciepłej|ciepłym|ciepła|ciepłe|ciepły|ciepłą)\\b"
-  }
-]
-```
-
----
-
-#### 🔗 and_conjunctions_registry
-
-```json
-[
-  {
-    "stem": "i",
-    "variants": ["i"],
-    "pattern": "\\bi\\b"
-  },
-  {
-    "stem": "oraz",
-    "variants": ["oraz"],
-    "pattern": "\\boraz\\b"
-  }
-]
-```
-
----
-
-#### 🔗 or_conjunctions_registry
-
-```json
-[
-  {
-    "stem": "albo",
-    "variants": ["albo"],
-    "pattern": "\\balbo\\b"
-  },
-  {
-    "stem": "bądź",
-    "variants": ["bądź"],
-    "pattern": "\\bbądź\\b"
-  },
-  {
-    "stem": "ewentualnie",
-    "variants": ["ewentualnie"],
-    "pattern": "\\bewentualnie\\b"
-  },
-  {
-    "stem": "lub",
-    "variants": ["lub"],
-    "pattern": "\\blub\\b"
-  },
-  {
-    "stem": "lub_też",
-    "variants": ["lub_też"],
-    "pattern": "\\blub_też\\b"
-  }
-]
-```
-
-## 🔍`recognize_ingredients`
 ```python
+from regex_engine import create_demo
+engine = create_demo(mapping)   # mapping: dict[str, ParsedIngredient]
+```
 
-results = engine.recognize_ingredients([
-    "2 słoiki śmietany",                  
-    "2 łyżki mleka",                     
-    "szklankę ciepłego mleka",             
-    "szklanki wody",                     
-    "2 jajka",                           
-    "czubata łyżka śmietany",            
-    "5 łyżek śmietany",                  
-    "dżem (lub marmolada)",              
-    "słoik dżemu",                       
-])
+See `examples/quickstart.ipynb` (needs a key) and `examples/quickstart_demo.ipynb` (offline).
+
+### Tests
+
+```bash
+pytest                # unit + integration (spins up Postgres via testcontainers)
+uv run pytest
 ```
-```json
-[
-  {
-    "raw_input": "2 słoiki śmietany",
-    "amount": 2.0,
-    "unit_size": null,
-    "unit": "słoik",
-    "condition": null,
-    "name": "śmietana",
-    "extra": ""
-  },
-  {
-    "raw_input": "2 łyżki mleka",
-    "amount": 2.0,
-    "unit_size": null,
-    "unit": "łyżka",
-    "condition": null,
-    "name": "mleko",
-    "extra": ""
-  },
-  {
-    "raw_input": "szklankę ciepłego mleka",
-    "amount": 1.0,
-    "unit_size": null,
-    "unit": "szklanka",
-    "condition": "ciepły",
-    "name": "mleko",
-    "extra": ""
-  },
-  {
-    "raw_input": "szklanki wody",
-    "amount": 1.0,
-    "unit_size": null,
-    "unit": "szklanka",
-    "condition": null,
-    "name": "woda",
-    "extra": ""
-  },
-  {
-    "raw_input": "2 jajka",
-    "amount": 2.0,
-    "unit_size": null,
-    "unit": null,
-    "condition": null,
-    "name": "jajko",
-    "extra": ""
-  },
-  {
-    "raw_input": "czubata łyżka śmietany",
-    "amount": 1.0,
-    "unit_size": "czubaty",
-    "unit": "łyżka",
-    "condition": null,
-    "name": "śmietana",
-    "extra": ""
-  },
-  {
-    "raw_input": "5 łyżek śmietany",
-    "amount": 5.0,
-    "unit_size": null,
-    "unit": "łyżka",
-    "condition": null,
-    "name": "śmietana",
-    "extra": ""
-  },
-  {
-    "raw_input": "dżem (lub marmolada)",
-    "amount": 1.0,
-    "unit_size": null,
-    "unit": null,
-    "condition": null,
-    "name": "dżem",
-    "extra": "lub marmolada"
-  },
-  {
-    "raw_input": "słoik dżemu",
-    "amount": 1.0,
-    "unit_size": null,
-    "unit": "słoik",
-    "condition": null,
-    "name": "dżem",
-    "extra": ""
-  }
-]
-```
-##  🗂️ Categorisation
+
+The suite has ~**226 test functions across 32 files**, split into `unit/`, `integration/` (real
+Postgres, Morfeusz), and `live/` (real LLM) tiers.
+
+---
+
+## 💰 Cost Profile
+
+Measured: learning 100 ingredients with `gpt-4o-mini`, `ensemble_size=5`, `max_retries=3` ≈
+**$0.09**, scaling roughly linearly with the number of *distinct* ingredients. Because recognition is
+pure regex, per-request runtime cost is **$0**. (Categorization uses the same LLM mechanism, so its
+cost profile is comparable to the learning phase.)
+
+---
+
+## 🧩 Public API Surface
+
 ```python
-categories = await engine.categorize_registries()
-```
-```json
-{
-    "mleko": Category.DAIRY,
-    "śmietana": Category.DAIRY,
-    "jajko": Category.EGGS,
-    "woda": Category.BEVERAGES,
-    "dżem": Category.PROCESSED
-}
-```
-
-
----
-
-# 🏗️ Architecture
-
-The system consists of the following components:
-
-- **RegexEngine** – the main system entry point, responsible for orchestrating learning, recognition, and persistence processes.  
-- **IngredientLearningEngine** – a component implementing the core learning loop, processing ingredients and initializing regex registry construction.  
-- **LearningRules** – a set of rules responsible for filtering and reducing input data during the learning process.  
-- **Normalizers (unit, ingredient_name, unit_size, ingredient_condition)** – components responsible for morphological normalization and inflection handling.  
-- **IngredientParser** – decomposes an ingredient into semantic components (e.g., name, unit, condition).  
-- **RegexRegistry (unit, ingredient_name, unit_size, ingredient_condition, and_conjunctions, or_conjunctions)** – registries storing regex patterns. Each registry is separated into a read (reader) and write (writer) layer.  
-- **RegexEntry** – the fundamental registry unit, containing:
-  - `stem` (key),  
-  - `variants` (word inflections used to construct the regex).  
-- **RegexServices (unit, ingredient_name, unit_size, ingredient_condition)** – components responsible for maintaining registry consistency by adding new entries or extending existing ones with additional variants.  
-- **RegexOrchestrator** – coordinates services responsible for regex construction and updates.  
-- **RegexResolver** – builds a `ResolvedIngredient` object based on data from the RegexRegistry, containing structured fields (`raw_input`, `name`, `amount`, `condition`, `unit`, `unit_size`, `extra`).  
-- **InputAdapter** – standardizes input data into the `IngredientRecord` format, regardless of the input source.  
-- **Categorizer** – assigns ingredient names to appropriate food categories.  
-- **RegexRepository** – responsible for persisting and retrieving regex registries.  
-- **CategoryRepository** – responsible for persisting and retrieving ingredient categories.
-
----
-
-# 🔄 Workflow
-
-The system operates in multiple modes corresponding to successive data processing stages.
-
-## 🧠 `learn(ingredients)`
-
-A function responsible for building the regex database.
-
-### Input
-
-- `str`  
-- `list[str]`  
-- `pandas`  
-
-Data is converted into the `IngredientRecord` structure.
-
-### 🧹 Initial Filtering
-
-At the beginning, records containing conjunctions are removed,
-
-except when the conjunction occurs:
-
-- between numbers (e.g., "4 and 1/2"),  
-- within parentheses.  
-
-### 🔁 Learning Loop
-
-The learning process is iterative:
-
-- Records that can already be structured based on existing regex patterns are removed.  
-- The ingredient with the highest occurrence frequency is selected.  
-- The ingredient is parsed by the Agent.
-
-**Example:**
-
-`2 duże łyżki ciepłego mleka`
-
-**Parsing result:**
-
-- `2` → amount  
-- `duże` → unit_size  
-- `łyżki` → unit  
-- `ciepłego` → ingredient_condition  
-- `mleka` → ingredient_name  
-
-### 🧱 Regex Entry Construction
-
-For each segment:
-
-- if the segment can already be recognized → it is skipped  
-- otherwise:
-  - a stem is created  
-  - existence of a `RegexEntry` is verified  
-  - if it exists → a new variant is added  
-  - if it does not exist → a new entry is created  
-
-Normalization and inflection handling are based on the Morfeusz library.
-
----
-
-### 🔤 Normalization
-
-### 🧬 Stem Construction
-
-### `ingredient_name_normalizer`
-
-The phrase is analyzed by `phrase_analyser`, which detects:
-
-- head noun  
-- dependent noun  
-- adjectives / adjectival participles  
-- remaining phrase  
-
-**Example:**
-
-`mąka pszenna typu 2 z nizin himalajskich`
-
-**Analysis:**
-
-- `mąka` → head noun  
-- `pszenna` → adjective  
-- `typu 2 z nizin himalajskich` → remainder  
-
-**Rules:**
-
-- normalization to nominative singular  
-- if two nouns are present → both in nominative  
-- for pluralia tantum → plural form
-
-
-### `adjective_normalizer`
-
-For:
-
-- `unit_size`  
-- `ingredient_condition`  
-
-The following form is applied:
-
-- nominative  
-- singular  
-- masculine gender  
-
-### `unit_normalizer`
-
-Units are normalized to:
-
-- nominative singular  
-
----
-
-### 🔄 Inflection Generation
-
-After determining the `stem`, inflectional variants are generated.
-
-**Standard set:**
-
-- nominative singular  
-- genitive singular  
-- accusative singular  
-- instrumental singular  
-- nominative plural  
-- genitive plural  
-- instrumental plural  
-
-##### 🧩 Compound Names (Two Nouns)
-
-For names such as:
-
-- `żółtko jajka`  
-- `śmietanka kremówka`  
-
-The following combinations are generated:
-
-- both nouns → full inflection set  
-- first noun → full inflection set, second → genitive  
-
-##### 🏷️ Adjectives
-
-A standard set is generated for each gender:
-
-- masculine inanimate  
-- feminine  
-- neuter  
-
-##### 📏 Units
-
-A standard inflection set is generated.
----
-
-### ⚙️ Regex Construction
-
-Based on:
-
-- `stem`  
-- `variants`  
-
-the following is created:
-
-`RegexEntry(stem, variants, regex)`
-
-The entry is stored in the appropriate `RegexRegistry`:
-
-- `unit`  
-- `unit_size`  
-- `ingredient_name`  
-- `ingredient_condition`  
-
----
-
-## 🔍 `recognize_ingredients(ingredients)`
-
-A function responsible for ingredient recognition without using an LLM.
-
-#### ⚡ Flow
-
-- Input data is converted to `IngredientRecord`  
-- The system matches fragments against regex patterns from `RegexRegistry`  
-
-##### 🔢 `amount` handling
-
-- if the first token is a number → it is used as `amount`  
-- otherwise → `amount = 1`  
-
-If the pattern:
-
-`number + conjunction + number`
-
-→ values are summed  
-
-**Examples:**
-
-`4 and 1/2 cups of water`
-
-**Result:**
-```json
-{
-  "raw_input": "4 i 1/2 szklanki wody",
-  "amount": 4.5,
-  "unit": "szklanka",
-  "unit_size": null,
-  "condition": null,
-  "name": "woda",
-  "extra": ""
-}
+from regex_engine import (
+    create_engine,          # async: build a production engine from EngineConfig
+    create_demo,            # sync: build an offline demo engine
+    EngineConfig,
+    AgentConfig,
+    FileStorageConfig,
+    DatabaseStorageConfig,
+    IngredientRegexEngine,  # Protocol
+    ResolvedIngredient,     # result DTO
+)
 ```
 
-## 🏷️ `categorize_registries()`
-
-- uses the Agent (LLM)  
-- assigns ingredients to categories:
-  - DAIRY = "nabiał"
-  - MEAT = "mięso"
-  - FISH_AND_SEAFOOD = "ryby i owoce morza"
-  - EGGS = "jajka"
-  - GRAINS = "produkty zbożowe"
-  - VEGETABLES = "warzywa"
-  - FRUITS = "owoce"
-  - LEGUMES = "rośliny strączkowe"
-  - NUTS_AND_SEEDS = "orzechy i nasiona"
-  - FATS_AND_OILS = "tłuszcze i oleje"
-  - SUGARS_AND_SWEETENERS = "cukry i słodziki"
-  - SPICES_AND_HERBS = "przyprawy i zioła"
-  - SAUCES_AND_DRESSINGS = "sosy i dressingi"
-  - MUSHROOMS = "grzyby"
-  - PROCESSED = "przetworzone"
-  - PREPARED_MEALS = "gotowe dania"
-  - SOUPS = "zupy/buliony"
-  - BEVERAGES = "napoje"
-  - ALCOHOL = "alkohol"
-  - NON_FOOD = "niejadalne"
-  - OTHER = "inne"
-  - UNKNOWN = "nieznane"
+`IngredientRegexEngine` protocol: `learn`, `recognize_ingredients`, `categorize_registries`,
+`save_registries`, `save_categories`, `save`, `get_registries`.
 
 ---
 
-## 💾 `save_registries()`
+## 📄 Credits & License
 
-- saves all `RegexRegistry` instances into separate files  
-- if categories are available → data is saved in a grouped form  
----
+- **Morfeusz2** — morphological analysis of the Polish language.
+- **OpenAI models** (via the Agents SDK) — ingredient parsing and categorization.
 
-## 💾 `save_categories()`
-
-Saves:
-
-- `stem`  
-- `category`  
-
----
-
-# 🤝 Credits
-
-The project utilizes:
-
-- Morfeusz2 – morphological analysis of the Polish language  
-- LLM models (OpenAI) – parsing and categorization  
-
-# 📄 License
-
-MIT License
+Released under the **MIT License**.
